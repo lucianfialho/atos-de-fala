@@ -1,0 +1,33 @@
+# config/taxonomy.yaml
+# FROZEN v1 (2026-06-05) — grounded in ISO 24617-2 (Bunt et al., LREC 2012) + Searle.
+# General-purpose communicative functions + Social Obligations Management functions,
+# adapted for open PT-BR text. Dialogue-control dimensions (turn/time/feedback) are
+# OUT OF SCOPE for v1 (irrelevant outside transcribed conversation).
+# The code is taxonomy-agnostic — refine the act set here without touching code.
+acts:
+  - name: informar
+    definition: Prover ou declarar informacao (ISO Inform; assertivo).
+  - name: perguntar
+    definition: Solicitar informacao (ISO Question, tipos set/propositional/check; diretivo).
+  - name: concordar
+    definition: Manifestar acordo com algo dito (ISO Agreement; assertivo/expressivo).
+  - name: discordar
+    definition: Manifestar desacordo com algo dito (ISO Disagreement; assertivo/expressivo).
+  - name: pedir
+    definition: Requisitar ou ordenar uma acao do interlocutor (ISO Request/Instruct; diretivo).
+  - name: sugerir
+    definition: Propor uma acao sem obrigar (ISO Suggestion; diretivo fraco).
+  - name: oferecer
+    definition: Oferecer-se para fazer ou dar algo (ISO Offer; comissivo).
+  - name: prometer
+    definition: Comprometer-se com uma acao futura (ISO Promise; comissivo).
+  - name: saudar
+    definition: Iniciar contato social (ISO Greeting; expressivo social).
+  - name: agradecer
+    definition: Expressar gratidao (ISO Thanking; expressivo social).
+  - name: desculpar
+    definition: Pedir desculpas (ISO Apology; expressivo social).
+  - name: despedir
+    definition: Encerrar contato social (ISO Valediction; expressivo social).
+  - name: expressar_emocao
+    definition: Manifestar estado emocional ou avaliacao afetiva (expressivo; sentiment).
