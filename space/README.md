@@ -1,5 +1,5 @@
 ---
-title: Chomsky Speech Acts PT-BR
+title: Atos de Fala PT-BR
 emoji: 🗣️
 colorFrom: blue
 colorTo: green
@@ -10,9 +10,10 @@ pinned: false
 license: mit
 ---
 
-# chomsky — classificador de atos de fala (PT-BR)
+# Classificador de Atos de Fala (PT-BR)
 
 Decompõe um texto em português e classifica a **intenção (ato de fala)** de cada trecho.
+(Codinome do projeto: *chomsky* — irônico de propósito; a base teórica é pragmática/Searle, não a sintaxe chomskyana.)
 
 - **Modelo:** BERTimbau (`neuralmind/bert-base-portuguese-cased`) + LoRA, treinado como
   token-classifier BIOES.

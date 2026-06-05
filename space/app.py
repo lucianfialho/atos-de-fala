@@ -109,7 +109,7 @@ if __name__ == "__main__":
         inputs=gr.Textbox(lines=3, label="Texto (PT-BR)",
                           placeholder="Bom dia! Você poderia revisar o relatório? Obrigado."),
         outputs=gr.HighlightedText(label="Atos de fala", combine_adjacent=False),
-        title="chomsky · classificador de atos de fala (PT-BR)",
+        title="Classificador de Atos de Fala (PT-BR)",
         description="BERTimbau + LoRA, destilado de DeepSeek. 13 atos de fala (ISO 24617-2 + Searle): "
                     "informar, perguntar, concordar, discordar, pedir, sugerir, oferecer, prometer, "
                     "saudar, agradecer, desculpar, despedir, expressar_emocao.",
