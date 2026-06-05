@@ -1,7 +1,7 @@
 ---
 type: synthesis
 tags: [language-models, fine-tuning, training, speech-acts, ner]
-sources: 9
+sources: 10
 updated: 2026-06-05
 ---
 
@@ -30,6 +30,10 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   approach. (PROPOR 2024 "Bringing Pragmatics to Porttinari" annotates news, not at our granularity.)
 - **PT-BR pragmatics notes for annotation:** indirect requests ("você poderia…?" = `pedir`) and
   diminutive softeners ("um minutinho") — captured in the rubric, not as labels.
+- **Compact tagset is the reliable choice** (Geertzen et al. 2008): coarser DA tagsets get higher
+  inter-annotator agreement; Turn/Feedback dimensions are unreliable. Confirms the 13-act v1 and
+  the dropped dimensions. Known confusable pairs (inform×answer×elaborate×explain; instruct×answer)
+  → seed the Plan-2 rubric's disambiguation guidance.
 
 ## Portable Theses
 
