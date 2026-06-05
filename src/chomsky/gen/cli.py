@@ -1,5 +1,4 @@
 import argparse
-import os
 import sys
 from typing import List, Dict
 from chomsky.taxonomy import load_taxonomy
@@ -7,6 +6,7 @@ from chomsky.gen.prompts import (
     parse_llm_json,
     build_generation_prompt,
     build_annotation_prompt,
+    build_adjudication_prompt,
 )
 from chomsky.gen.minimax import MiniMaxClient
 from chomsky.gen.claude import ClaudeClient
@@ -50,30 +50,37 @@ def run(args) -> int:
         return parse_llm_json(raw)["spans"]
 
     def adjudicate(text: str, problems: List[str]) -> List[Dict]:
-        raw = cl.complete(build_annotation_prompt(rubric, text))
+        raw = cl.complete(build_adjudication_prompt(rubric, text, problems))
         return parse_llm_json(raw)["spans"]
 
     done = load_done_texts(args.out)
     accepted = len(done)
-    # deterministic cross-check selection: every Kth example (avoids RNG, resume-stable)
     every = max(1, round(1 / args.cross_check_rate)) if args.cross_check_rate > 0 else 0
     seen = 0
+    consecutive_failures = 0
+    max_consecutive = max(50, args.n)  # stall guard: stop if we can't make progress
     while accepted < args.n:
+        if consecutive_failures >= max_consecutive:
+            print(f"stopping: {consecutive_failures} consecutive non-accepts "
+                  f"(generation likely degraded)", file=sys.stderr)
+            return 1
         seen += 1
         try:
             obj = mm_generate_one()
-        except Exception as e:  # noqa: BLE001 — log and continue (don't crash the run)
+            text = obj["text"]
+            if text in done:
+                consecutive_failures += 1
+                continue
+            cross = cl_annotate if (every and seen % every == 0) else None
+            res = process_example(
+                text, obj["spans"], taxonomy=taxonomy,
+                cross_annotate=cross, adjudicate=adjudicate, threshold=args.threshold,
+            )
+        except Exception as e:  # noqa: BLE001 — never let one bad example kill the run
             if args.debug:
-                print(f"[gen-error] {e}", file=sys.stderr)
+                print(f"[error] {e}", file=sys.stderr)
+            consecutive_failures += 1
             continue
-        text = obj["text"]
-        if text in done:
-            continue
-        cross = cl_annotate if (every and seen % every == 0) else None
-        res = process_example(
-            text, obj["spans"], taxonomy=taxonomy,
-            cross_annotate=cross, adjudicate=adjudicate, threshold=args.threshold,
-        )
         if args.debug:
             print(f"[{res.status}] agree={res.agreement} {res.reason} :: {text[:60]!r}",
                   file=sys.stderr)
@@ -81,7 +88,10 @@ def run(args) -> int:
             append_annotation(args.out, res.annotation)
             done.add(text)
             accepted += 1
+            consecutive_failures = 0
             print(f"accepted {accepted}/{args.n}")
+        else:
+            consecutive_failures += 1
     return 0
 
 

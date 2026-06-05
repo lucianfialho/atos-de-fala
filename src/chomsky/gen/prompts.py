@@ -59,3 +59,16 @@ def build_annotation_prompt(rubric: str, text: str) -> List[Dict]:
         f"TEXTO:\n{text}"
     )
     return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]
+
+
+def build_adjudication_prompt(rubric: str, text: str, problems: List[str]) -> List[Dict]:
+    issues = "; ".join(problems) if problems else "anotacao anterior invalida ou inconsistente"
+    user = (
+        f"{rubric}\n\n"
+        f"Uma anotacao anterior do texto abaixo teve problemas: {issues}.\n"
+        f"Reanote com cuidado, corrigindo esses problemas. NAO altere o texto. "
+        f'Responda com um objeto JSON: {{"text": "<o texto original, inalterado>", '
+        f'"spans": [{{"quote": "trecho exato", "act": "<ato>"}}]}}.\n\n'
+        f"TEXTO:\n{text}"
+    )
+    return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]

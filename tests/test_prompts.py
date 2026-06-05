@@ -49,3 +49,12 @@ def test_build_annotation_prompt_includes_text():
     joined = " ".join(m["content"] for m in msgs)
     assert "RUBRICA" in joined
     assert "Bom dia!" in joined
+
+
+def test_build_adjudication_prompt_includes_problems_and_text():
+    from chomsky.gen.prompts import build_adjudication_prompt
+    msgs = build_adjudication_prompt("RUBRICA", "Bom dia!", ["illegal act: 'xingar'"])
+    joined = " ".join(m["content"] for m in msgs)
+    assert "RUBRICA" in joined
+    assert "Bom dia!" in joined
+    assert "xingar" in joined
