@@ -46,6 +46,7 @@ Seeded from `myFirstSmallModel` on 2026-06-04 — fine-tuning / language-model s
 - [BR PII Dataset Pipeline](wiki/concepts/br-pii-dataset-pipeline.md) — Pipeline 4devs → variants → templates → LLM → validate → label, com custos reais
 - [Multi-Provider Generation](wiki/concepts/multi-provider-generation.md) — Claude CLI + MiniMax paralelos pro mesmo dataset, gotchas comuns
 - [Competitive Research Discipline](wiki/concepts/competitive-research-discipline.md) — Sempre buscar HF/GitHub ANTES de construir modelo novo
+- [Teacher-Mixture Generation Pipeline](wiki/concepts/teacher-mixture-pipeline.md) — MiniMax bulk + Claude adjudicador, agreement gate, orquestração pura; produz JSONL gold pra destilação
 
 ### Speech Acts (chomsky project)
 - [Speech Act Theory](wiki/concepts/speech-act-theory.md) — Austin/Searle; força ilocucionária; 5 macro-classes — base teórica do modelo
