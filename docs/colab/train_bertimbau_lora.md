@@ -1,5 +1,8 @@
 # Colab Runbook — BERTimbau LoRA (speech-act span classifier)
 
+> **Primary path is now `docs/remote/train_tailscale.md`** (train on our own NVIDIA box over
+> Tailscale; dataset generated there too). Keep this Colab runbook as a fallback.
+
 Target: Colab A100. Mirrors the Privacy Filter BR setup; applies wiki lora-fine-tuning-pitfalls.
 
 ## Steps

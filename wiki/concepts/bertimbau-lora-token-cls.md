@@ -35,4 +35,5 @@ Filter BR (`score`, `q_proj`/`v_proj`) — the exact-name pitfall.
 ## Sources
 
 - Plan: `docs/superpowers/plans/2026-06-04-training-eval.md`
-- Colab: `docs/colab/train_bertimbau_lora.md`
+- Remote runbook (primary): `docs/remote/train_tailscale.md` (own NVIDIA box over Tailscale)
+- Colab runbook (fallback): `docs/colab/train_bertimbau_lora.md`

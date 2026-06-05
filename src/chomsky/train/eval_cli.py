@@ -22,6 +22,8 @@ def predict_annotations(model_dir: str, texts: List[str], max_length: int = 256)
 
     tokenizer = AutoTokenizer.from_pretrained(model_dir, use_fast=True)
     model = AutoPeftModelForTokenClassification.from_pretrained(model_dir)
+    if torch.cuda.is_available():
+        model = model.cuda()
     model.eval()
     id2label = model.config.id2label
 
