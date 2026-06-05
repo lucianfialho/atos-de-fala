@@ -23,8 +23,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--epochs", type=float, default=5.0)
     p.add_argument("--max-steps", type=int, default=-1)
     p.add_argument("--batch-size", type=int, default=16)
+    p.add_argument("--grad-accum", type=int, default=1,
+                   help="gradient accumulation steps (raise effective batch on small VRAM)")
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--max-length", type=int, default=256)
+    p.add_argument("--fp16", action="store_true",
+                   help="mixed-precision fp16 (use on Turing GPUs e.g. RTX 2070; NOT bf16)")
     p.add_argument("--cpu", action="store_true", help="force CPU (smoke/debug)")
     return p
 
@@ -64,10 +68,12 @@ def main(argv=None) -> int:
         num_train_epochs=args.epochs,
         max_steps=args.max_steps,
         per_device_train_batch_size=args.batch_size,
+        gradient_accumulation_steps=args.grad_accum,
         learning_rate=args.lr,
         logging_steps=10,
         save_strategy="no",
         report_to=[],
+        fp16=args.fp16,
         use_cpu=args.cpu,
     )
     trainer = Trainer(

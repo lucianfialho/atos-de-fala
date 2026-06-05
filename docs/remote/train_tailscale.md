@@ -5,12 +5,25 @@ synthetic generation, training, and evaluation — runs on a remote **NVIDIA CUD
 reached over Tailscale SSH. Only the code is pushed from the laptop; the dataset is generated on
 the box.
 
-Set your Tailscale host once (MagicDNS name or 100.x IP):
+Target box (confirmed): **`lucian@lucian-desktop.tailbb1a78.ts.net`** — Linux x86_64, **RTX 2070
+SUPER (8 GB VRAM, Turing)**, Python 3.10.12, ~295 GB free.
 
 ```bash
-REMOTE=user@your-box.tailnet-name.ts.net      # e.g. lucian@gpu.tailnet.ts.net
+REMOTE=lucian@lucian-desktop.tailbb1a78.ts.net
 REMOTE_DIR=~/chomsky
 ```
+
+**Connection:** the plain `ssh` client hits "Host key verification failed" for this host, so use
+the Tailscale SSH wrapper for both interactive shells and as rsync's transport:
+
+```bash
+tailscale ssh "$REMOTE"                         # interactive
+rsync -e 'tailscale ssh' ...                    # file transfer (see below)
+```
+
+**Hardware note (RTX 2070 SUPER, 8 GB):** use **fp16, not bf16** (Turing has no bf16 tensor
+cores). Keep `--batch-size 8` (try 16 if it fits), `--max-length 256` (drop to 128 on OOM). For
+fp16 add `fp16=True` to TrainingArguments (see step 5).
 
 ## 1. Push the code (rsync over Tailscale SSH)
 
@@ -19,11 +32,11 @@ generated data (the dataset is regenerated on the box). `raw/` (incl. the Portti
 `config/` ARE sent — they're needed for eval and the rubric/taxonomy.
 
 ```bash
-# run from the repo root on the laptop
-rsync -avz --delete \
+# run from the repo root on the laptop (Tailscale SSH transport)
+rsync -avz --delete -e 'tailscale ssh' \
   --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' \
-  --exclude '*.egg-info/' --exclude '.pytest_cache/' --exclude 'data/' \
-  ./ "$REMOTE:$REMOTE_DIR/"
+  --exclude '*.egg-info/' --exclude '.pytest_cache/' --exclude 'data/' --exclude 'runs/' \
+  ./ "$REMOTE:chomsky/"
 ```
 
 ## 2. One-time environment setup (on the box)
@@ -82,10 +95,11 @@ PY
 ```bash
 python -m chomsky.train.train \
   --train data/dataset.jsonl --out runs/sa-lora \
-  --epochs 5 --batch-size 16 --lr 2e-4
+  --epochs 5 --batch-size 8 --grad-accum 4 --lr 2e-4 --fp16
 ```
-`train.py` picks `cuda` when available (no `--cpu`). For bf16 on Ampere+ you can extend
-TrainingArguments with `bf16=True` if desired. Watch disk for logs.
+`train.py` picks `cuda` automatically. On the RTX 2070 SUPER (8 GB, Turing) use `--fp16` (NOT bf16)
+and a small per-device batch with `--grad-accum` for a larger effective batch (here 8×4 = 32). If
+you hit CUDA OOM: lower `--batch-size` to 4, or `--max-length` to 128. Watch disk for logs.
 
 ## 6. Evaluate on the real Porttinari holdout (span-F1; uses GPU if present)
 
