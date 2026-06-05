@@ -35,7 +35,7 @@ generated data (the dataset is regenerated on the box). `raw/` (incl. the Portti
 # run from the repo root on the laptop (Tailscale SSH transport)
 rsync -avz --delete -e 'tailscale ssh' \
   --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' \
-  --exclude '*.egg-info/' --exclude '.pytest_cache/' --exclude 'data/' --exclude 'runs/' \
+  --exclude '*.egg-info/' --exclude '.pytest_cache/' --exclude '/data/' --exclude '/runs/' \
   ./ "$REMOTE:chomsky/"
 ```
 
