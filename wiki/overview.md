@@ -1,7 +1,7 @@
 ---
 type: synthesis
 tags: [language-models, fine-tuning, training, speech-acts, ner]
-sources: 10
+sources: 11
 updated: 2026-06-05
 ---
 
@@ -26,8 +26,13 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   one or more communicative functions — the grounding for span-level tagging.
 - **Taxonomy frozen at 13 acts / 53 labels** from ISO 24617-2 general-purpose + social-obligation
   functions, mapped to Searle, adapted for open text (dialogue-control dimensions dropped).
-- **No public PT-BR span-level speech-act dataset exists** — confirms the synthetic teacher
-  approach. (PROPOR 2024 "Bringing Pragmatics to Porttinari" annotates news, not at our granularity.)
+- **A PT-BR speech-act corpus exists but only at sentence level** — the Porttinari speech-act
+  corpus (da Silva et al., PROPOR 2024; ISO-based, CC). No *span-level* PT-BR dataset exists, so our
+  granularity is novel; and the Porttinari corpus becomes our **real-text holdout** for Plan-3 eval.
+- **Class imbalance is the killer, and synthetic data is the answer:** in natural news, `inform`
+  is 91% of sentences → Porttinari's BERTimbau hit 92% weighted-F1 but only **29.5% macro-F1**, with
+  rare acts at F1=0. Our teacher pipeline *controls* the distribution, balancing rare acts that
+  natural corpora cannot. This is the strongest justification for the synthetic approach.
 - **PT-BR pragmatics notes for annotation:** indirect requests ("você poderia…?" = `pedir`) and
   diminutive softeners ("um minutinho") — captured in the rubric, not as labels.
 - **Compact tagset is the reliable choice** (Geertzen et al. 2008): coarser DA tagsets get higher

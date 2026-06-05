@@ -6,6 +6,7 @@ Seeded from `myFirstSmallModel` on 2026-06-04 — fine-tuning / language-model s
 ## Sources
 - [ISO 24617-2 (Bunt et al., LREC 2012)](wiki/sources/2012-iso-24617-2-bunt-lrec.md) — standard for dialogue-act annotation; functional segments, GPFs, DiAML — backbone of our taxonomy
 - [Geertzen, Petukhova & Bunt (LREC 2008)](wiki/sources/2008-geertzen-da-tagging-naive-expert.md) — naive vs expert DA annotation; coarser tagset = higher agreement; confusable act pairs
+- [Porttinari speech-acts (PROPOR 2024)](wiki/sources/2024-porttinari-speech-acts-propor.md) — 1º corpus PT-BR de speech acts (ISO, sentence-level); BERTimbau; inform=91% → macro-F1 29.5%
 - [BERTimbau (Souza et al., BRACIS 2020)](wiki/sources/2020-bertimbau-souza.md) — monolingual PT-BR BERT; the student backbone for Plan 3
 - [Building a Small Language Model from Scratch](wiki/sources/2026-05-02-building-slm-from-scratch.md) — End-to-end tutorial for a 15M param GPT on TinyStories (Vizuara AI Labs, 2026)
 - [OpenAI Privacy Filter](wiki/sources/2026-05-02-openai-privacy-filter.md) — Open-weights PII detection model; 50M active params, F1 96%; bidirectional token classifier
@@ -56,6 +57,7 @@ Seeded from `myFirstSmallModel` on 2026-06-04 — fine-tuning / language-model s
 - [ISO 24617-2 / DiAML](wiki/entities/iso-24617-2.md) — padrão ISO de dialogue acts; GPFs + social obligations = nosso label set
 - [BERTimbau](wiki/entities/bertimbau.md) — BERT monolíngue PT-BR (neuralmind); backbone do student (Plano 3)
 - [Noam Chomsky](wiki/entities/noam-chomsky.md) — linguista; o projeto leva seu nome, mas usa o método que ele rejeitava
+- [Porttinari speech-act corpus](wiki/entities/porttinari-corpus.md) — corpus PT-BR de speech acts (CC); holdout real pro Plano 3
 - [TinyStories Dataset](wiki/entities/tiny-stories-dataset.md) — 2.1M GPT-4 generated children's stories; domain-restricted corpus
 - [GPT2 Tokenizer](wiki/entities/gpt2-tokenizer.md) — BPE tokenizer via tiktoken; vocab_size=50,257
 - [nanoGPT](wiki/entities/nano-gpt.md) — Karpathy's minimal GPT; primary code inspiration
