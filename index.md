@@ -39,7 +39,7 @@ Seeded from `myFirstSmallModel` on 2026-06-04 — fine-tuning / language-model s
 - [Bidirectional vs Autoregressive](wiki/concepts/bidirectional-vs-autoregressive.md) — BERT-style vs GPT-style; quando usar cada
 - [BIOES Tagging](wiki/concepts/bioes-tagging.md) — Span tagging scheme pra extração de entidades multi-token
 - [Viterbi Decoding](wiki/concepts/viterbi-decoding.md) — DP pra decodificação de sequência de tags válida
-- [Speech Act Label Scheme](wiki/concepts/speech-act-label-scheme.md) — BIOES label set (O ∪ {B,I,E,S}×atos) derivado de config/taxonomy.yaml; 12 atos provisórios → 49 labels
+- [Speech Act Label Scheme](wiki/concepts/speech-act-label-scheme.md) — BIOES label set (O ∪ {B,I,E,S}×atos) derivado de config/taxonomy.yaml; 13 atos congelados (ISO+Searle) → 53 labels
 - [BERTimbau LoRA Token Classification](wiki/concepts/bertimbau-lora-token-cls.md) — student: BERTimbau + LoRA (classifier, query/value) BIOES token-cls; treino Colab + eval span-F1
 
 ### Datasets & Data Generation

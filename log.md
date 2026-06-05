@@ -31,5 +31,5 @@ Paper mais próximo do projeto (raw em raw/sources): 1º corpus PT-BR de speech 
 ## [2026-06-05] build | Generation Pipeline (Plan 2)
 Executado o Plano 2 (subagent-driven, 8 tasks): prompts + parse robusto de JSON do LLM, clients HTTP MiniMax e Claude (parsing testável via requests monkeypatched), orquestração pura da mistura teacher (process_example com callables injetados), writer JSONL com fsync + resume, e CLI (`python -m chomsky.gen.cli`). Rúbrica CONGELADA em config/rubric.md com os 13 atos + regras dos papers da Fase 0 (rótulo mais específico; descrever ≠ realizar; pedido indireto = pedir; fusões). Suíte: 55 testes verde, tudo offline; smoke ao vivo (1 step) fica manual pq precisa de MINIMAX_API_KEY + ANTHROPIC_API_KEY. Saída do pipeline = JSONL de spans em offset (tokenização/BIOES no Plano 3).
 
-## [2026-06-04] build | Training & Eval (Plan 3)
+## [2026-06-05] build | Training & Eval (Plan 3)
 Implementado treino + avaliação: load_jsonl, align_labels e decoder BIOES→spans (lógica pura testada), model builder BERTimbau + LoRA (nomes BERT: classifier, query/value), train.py com HF Trainer (+ smoke CPU em bert-tiny) e eval CLI span-F1 reusando o evaluator do Plano 1. Runbook de Colab A100 com sanity check anti-NaN. Treino real depende de data/dataset.jsonl (Plano 2) e da taxonomia congelada (Fase 0).
