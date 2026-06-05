@@ -1,5 +1,6 @@
 .DS_Store
 .gates/
+.claude/
 
 # python
 __pycache__/

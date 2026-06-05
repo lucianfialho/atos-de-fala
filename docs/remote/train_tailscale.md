@@ -150,6 +150,19 @@ Step 4b is apples-to-apples span-F1 (same texts), so it tells you the teacher's 
 teachers, generate a batch with each (e.g. `--adjudicator kimi` vs `deepseek`), annotate one gold,
 and run `gold score` against each teacher's dataset. ~150 examples is enough for a first read.
 
+### Visual annotator (easier than hand-editing JSONL)
+
+Instead of editing `gold/to_annotate.jsonl` by hand, run the web annotator on the box and open it
+from the laptop browser over Tailscale — select a fragment, click an act (or keys 1–9), autosaves:
+
+```bash
+# on the box:
+python -m chomsky.annotate --file gold/to_annotate.jsonl --host 0.0.0.0 --port 8765
+# on the laptop: open http://lucian-desktop.tailbb1a78.ts.net:8765
+```
+It writes the same quote-JSONL, so afterwards run `gold compile` then `gold score` as above. No auth —
+it's a trusted box on the tailnet; bind to the 100.x IP instead of 0.0.0.0 if you want tailnet-only.
+
 ## Notes
 
 - The laptop is disk-constrained, which is why ml deps are NOT installed locally; the box owns the
