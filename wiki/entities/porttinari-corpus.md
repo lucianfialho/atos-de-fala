@@ -33,6 +33,10 @@ Local copy (CC, vendored): `raw/porttinari-base-speech-acts/` — annotation CSV
   compliment 24, answer 22, instruct 18, thanking 13, sympathy 11, request 7, confirm 6, promise 6,
   (correction/agreement/congratulation/apology ≤4).
 - 13 classes usable after dropping rare ones for ML.
+- Converter: `chomsky.train.porttinari` maps the CSV → chomsky JSONL (whole-sentence spans, labels
+  mapped to our 13 acts; all 4091 rows map, 0 unmapped). Run:
+  `python -m chomsky.train.porttinari --out data/porttinari-holdout.jsonl`. Eval against it reads as
+  a sentence-level signal (our spans are finer than whole-sentence gold).
 
 ## Sources
 
