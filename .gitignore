@@ -1,2 +1,11 @@
 .DS_Store
 .gates/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+# generated data
+data/

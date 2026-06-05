@@ -1,0 +1,28 @@
+# config/taxonomy.yaml
+# PROVISIONAL — to be frozen in Phase 1 from the ingested papers.
+# Base: Searle's 5 macro-classes expanded with useful ISO 24617-2 acts.
+acts:
+  - name: afirmar
+    definition: Declarar algo como verdadeiro (assertivo).
+  - name: perguntar
+    definition: Solicitar informacao (diretivo interrogativo).
+  - name: pedir
+    definition: Requisitar uma acao do interlocutor (diretivo).
+  - name: sugerir
+    definition: Propor uma acao sem obrigar (diretivo fraco).
+  - name: prometer
+    definition: Comprometer-se com uma acao futura (compromissivo).
+  - name: agradecer
+    definition: Expressar gratidao (expressivo).
+  - name: concordar
+    definition: Manifestar acordo com algo dito (expressivo/assertivo).
+  - name: discordar
+    definition: Manifestar desacordo com algo dito (expressivo/assertivo).
+  - name: saudar
+    definition: Iniciar contato social (expressivo).
+  - name: despedir
+    definition: Encerrar contato social (expressivo).
+  - name: informar
+    definition: Prover informacao nao solicitada (assertivo).
+  - name: expressar_emocao
+    definition: Manifestar estado emocional (expressivo).

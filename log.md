@@ -18,3 +18,6 @@ Fork BR do Privacy Filter: 11k sintéticos, LoRA head 33→53, F1 0.97 holdout i
 Reposicionar v2 como especialista B2B; dataset arthrod (914k) + 50-100k B2B novos via MiniMax.
 ## [2026-05-16] build | Privacy Filter BR v2 — Execução com bugs + multi-provider
 13→19 categorias, 14→18 templates. Multi-provider Claude CLI + MiniMax paralelos. 6 bugs documentados.
+
+## [2026-06-04] build | Annotation Core (Plan 1)
+Implementado o núcleo de anotação do classificador de atos de fala: schema (Span/Annotation), taxonomy + BIOES labels (config-driven), resolve de quotes→offsets, validator, BIOES tagger, agreement gate e span-F1 evaluator. ~27 testes, lógica pura sem APIs/GPU. Taxonomia provisória de 12 atos (49 labels) em config/taxonomy.yaml, a congelar na Fase 1.
