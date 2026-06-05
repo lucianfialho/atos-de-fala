@@ -30,7 +30,10 @@ Per example (pure function `chomsky.gen.pipeline.process_example`): resolve quot
 validate against the taxonomy → if invalid, Claude adjudicates or the example is rejected →
 on a sampled fraction, Claude cross-annotates and span-F1 agreement is measured → keep if
 ≥ threshold, else adjudicate or reject. API I/O is isolated in thin clients; orchestration is
-pure (injected callables), so it is fully unit-tested offline.
+pure (injected callables), so it is fully unit-tested offline. Generation runs in concurrent waves
+(`--concurrency N`, default 1): N requests in flight, results collected on the main thread (writes +
+counters serialized, no locks). I/O-bound, so ~N× faster wall-clock; balancing focus is recomputed
+per wave.
 
 ## Why It Matters
 

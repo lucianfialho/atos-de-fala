@@ -68,12 +68,14 @@ export DEEPSEEK_API_KEY=...        # bulk + adjudicator (DeepSeek-only)
 python -m chomsky.gen.cli \
   --provider deepseek --adjudicator deepseek --n 10000 \
   --out data/dataset.jsonl \
-  --cross-check-rate 0.15 --debug
+  --cross-check-rate 0.15 --concurrency 8 --debug
 ```
-Per-act balancing is on by default (steers toward ~n/13 of each act). Resume-safe: re-run the same
-command to continue if interrupted. Tip: run under `tmux`/`nohup` so it survives SSH drops —
-`nohup python -m chomsky.gen.cli ... > gen.log 2>&1 < /dev/null &` (lesson from Privacy Filter BR:
-redirect stdin/stdout and watch disk).
+`--concurrency 8` runs 8 requests in flight per wave — generation is I/O-bound (waiting on
+DeepSeek), so this is ~8× faster wall-clock than sequential (10k drops from hours to ~1h). Raise it
+if DeepSeek's rate limit allows; transient rate-limit errors are caught per-example and don't kill
+the run. Per-act balancing is on by default (steers toward ~n/13 of each act). Resume-safe: re-run
+the same command to continue. Run under `tmux`/`nohup` so it survives SSH drops —
+`nohup python -m chomsky.gen.cli ... --concurrency 8 > gen.log 2>&1 < /dev/null &` then `tail -f gen.log`.
 
 ## 4. Anti-NaN sanity check before training (wiki: lora-fine-tuning-pitfalls #5)
 
