@@ -1,3 +1,4 @@
+import pytest
 from chomsky.agreement import span_agreement, gate
 from chomsky.schema import Annotation, Span
 
@@ -32,3 +33,10 @@ def test_gate_keeps_above_threshold_and_adjudicates_below():
     c = _ann([Span(0, 8, "saudar")])
     d = _ann([Span(9, 18, "pedir")])
     assert gate(c, d, threshold=0.8) == "adjudicate"
+
+
+def test_different_texts_raise():
+    a = Annotation("texto um", [Span(0, 5, "saudar")])
+    b = Annotation("texto dois", [Span(0, 5, "saudar")])
+    with pytest.raises(ValueError):
+        span_agreement(a, b)

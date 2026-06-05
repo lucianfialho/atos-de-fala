@@ -7,6 +7,8 @@ def _span_set(ann: Annotation) -> Set[Tuple[int, int, str]]:
 
 
 def span_agreement(a: Annotation, b: Annotation) -> float:
+    if a.text != b.text:
+        raise ValueError("cannot compare annotations of different texts")
     sa, sb = _span_set(a), _span_set(b)
     if not sa and not sb:
         return 1.0

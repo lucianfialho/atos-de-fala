@@ -9,8 +9,11 @@ def resolve_quoted_spans(
     errors: List[str] = []
     cursor = 0
     for item in items:
-        quote = item["quote"]
-        act = item["act"]
+        quote = item.get("quote")
+        act = item.get("act")
+        if quote is None or act is None:
+            errors.append(f"malformed item, missing 'quote' or 'act': {item!r}")
+            continue
         idx = text.find(quote, cursor)
         if idx == -1:
             errors.append(f"quote not found at/after offset {cursor}: {quote!r}")

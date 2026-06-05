@@ -2,6 +2,15 @@ from chomsky.resolve import resolve_quoted_spans
 from chomsky.schema import Span
 
 
+def test_malformed_item_reports_error_without_crashing():
+    text = "Bom dia!"
+    items = [{"act": "saudar"}, {"quote": "Bom dia!", "act": "saudar"}]
+    ann, errors = resolve_quoted_spans(text, items)
+    assert len(errors) == 1
+    assert "missing" in errors[0]
+    assert ann.spans == [Span(0, 8, "saudar")]
+
+
 def test_resolves_quotes_to_offsets_in_order():
     text = "Bom dia! Pode enviar o relatorio?"
     items = [
