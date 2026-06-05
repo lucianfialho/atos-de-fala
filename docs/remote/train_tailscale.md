@@ -126,6 +126,30 @@ rsync -avz "$REMOTE:$REMOTE_DIR/data/dataset.jsonl" ./data/
 ```
 `runs/` and `data/` are gitignored (the model + dataset are artifacts, not source).
 
+## (Optional) Human gold set — measure how good a teacher actually is
+
+A small hand-annotated set lets you check the teacher's real accuracy and A/B teachers
+(DeepSeek vs Kimi vs MiniMax). It reuses the same resolve+validate machinery.
+
+```bash
+# 1) blind skeleton: sample ~150 generated TEXTS (labels stripped) for you to re-annotate
+python -m chomsky.gold template --from data/dataset.jsonl --n 150 --out gold/to_annotate.jsonl
+
+# 2) annotate by hand: edit gold/to_annotate.jsonl, fill each "spans" with
+#    {"quote": "<exact substring of text>", "act": "<one of the 13>"}  — follow config/rubric.md
+
+# 3) compile + validate (resolves quotes->offsets, flags bad quotes/illegal acts/overlap)
+python -m chomsky.gold compile --in gold/to_annotate.jsonl --out gold/gold.jsonl
+
+# 4a) use as a trustworthy eval holdout
+python -m chomsky.train.eval_cli --model runs/sa-lora --holdout gold/gold.jsonl
+# 4b) measure the TEACHER directly (its labels for those exact texts, from the dataset)
+python -m chomsky.gold score --gold gold/gold.jsonl --teacher data/dataset.jsonl
+```
+Step 4b is apples-to-apples span-F1 (same texts), so it tells you the teacher's ceiling. To A/B
+teachers, generate a batch with each (e.g. `--adjudicator kimi` vs `deepseek`), annotate one gold,
+and run `gold score` against each teacher's dataset. ~150 examples is enough for a first read.
+
 ## Notes
 
 - The laptop is disk-constrained, which is why ml deps are NOT installed locally; the box owns the
