@@ -1,4 +1,3 @@
-from typing import Tuple
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 from peft import LoraConfig, TaskType, get_peft_model
 from chomsky.taxonomy import Taxonomy, bioes_labels, label_maps

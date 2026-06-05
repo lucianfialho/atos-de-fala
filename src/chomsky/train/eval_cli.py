@@ -3,6 +3,7 @@ import json
 from typing import Dict, List
 from chomsky.schema import Annotation
 from chomsky.eval import span_prf1, per_act_f1
+from chomsky.train.data import load_jsonl
 
 
 def score_predictions(
@@ -34,6 +35,7 @@ def predict_annotations(model_dir: str, texts: List[str], max_length: int = 256)
             return_tensors="pt",
         )
         offsets = enc.pop("offset_mapping")[0].tolist()
+        enc = {k: v.to(model.device) for k, v in enc.items()}
         with torch.no_grad():
             logits = model(**enc).logits[0]
         ids = logits.argmax(-1).tolist()
@@ -55,8 +57,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def main(argv=None) -> int:
-    from chomsky.train.data import load_jsonl
-
     args = build_arg_parser().parse_args(argv)
     gold = load_jsonl(args.holdout)
     pred = predict_annotations(args.model, [a.text for a in gold], args.max_length)
