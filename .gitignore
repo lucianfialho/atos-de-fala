@@ -16,3 +16,6 @@ __pycache__/
 /gold/
 # logs
 *.log
+
+# visual brainstorming companion
+.superpowers/
