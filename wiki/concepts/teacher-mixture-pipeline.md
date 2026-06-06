@@ -30,6 +30,12 @@ reaches its quota, `over_target_acts` feeds it as an "EVITE" avoid-list in the p
 gratuitous courtesy openings/closings), so over-represented acts stop inflating. Tune with
 `--avoid-k` (0 disables).
 
+Both of the above are **data-side** levers. There is also a **training-side** lever: `atos.train.train
+--class-weights` (a `WeightedTrainer` with inverse-frequency CrossEntropy). Measured to lift macro-F1
++0.05 and pull rare acts off the floor on the Porttinari in-domain eval (without it the FT collapses
+to the majority). The two are complementary — rebalance the data *and* weight the loss. Empirical
+numbers in `docs/superpowers/specs/2026-06-06-atos-layer-spec.md`.
+
 ## How It Works
 
 Per example (pure function `atos.gen.pipeline.process_example`): resolve quotes→offsets →

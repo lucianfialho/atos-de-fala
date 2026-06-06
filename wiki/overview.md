@@ -53,6 +53,19 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   per-act quota the teacher is told to skip gratuitous courtesy openings/closings, so it stops
   inflating scaffolding. Complements positive `focus`; a rebalanced regen run is the next step
   to actually move 0.47 → ~0.9.
+- **First real eval against the benchmark (2026-06-06).** Measured on the **Porttinari holdout**
+  (sentence-level, n=4091) — see spec `docs/superpowers/specs/2026-06-06-atos-layer-spec.md`:
+  - **Zero-shot** (synthetic-only model, out-of-domain): macro-F1 **0.201** (coarse 0.407),
+    acc 0.827 — `informar` 0.91, `perguntar` 0.62; rare/social acts near 0. ~68% of the paper's
+    in-domain SOTA (0.295). Validates transfer; confirms the synthetic-distribution gap (scaffolding
+    acts inflated in synthetic are near-absent in real news → `agradecer` recall 0.08).
+  - **In-domain FT, no class weights:** acc 0.938 but macro-F1 0.214 (coarse 0.388) — **collapsed to
+    the majority** (informar/perguntar ~0.96, rest 0.0). **Domain isn't the fix; imbalance is.**
+  - **In-domain FT + `--class-weights`:** macro-F1 **0.262** (coarse **0.439**) — rare acts off the
+    floor (sugerir 0.31, discordar 0.19); **~89% of the paper SOTA with only the loss fix, no data
+    work.** Empirically confirms "class imbalance is the killer". The new `WeightedTrainer`
+    (inverse-frequency loss) is the training-side lever, complementary to data-side steering — and
+    it should lift the **production synthetic** model on rare acts without the API-blocked regen.
 - **In-browser inference gotchas (two):** (1) the Transformers.js token-classification pipeline
   returns `{entity, score, index, word}` with **no char offsets** — char spans must be
   reconstructed by walking the text and matching `word` tokens (handling WordPiece `##`);
