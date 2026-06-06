@@ -70,18 +70,25 @@ Split 80/20 do Porttinari (train 3272 / test 819), LoRA 5 épocas, **sem class w
 | Modelo | acc | macro-F1 (13) | macro-F1 (coarse) |
 |---|---|---|---|
 | zero-shot (só sintético) | 0.827 | 0.201 | 0.407 |
-| in-domain FT (sem pesos) | **0.938** | 0.214 | 0.388 |
-| paper SOTA (in-domain **+ pesos**) | ~0.92 | **0.295** | — |
+| in-domain FT (sem pesos) | 0.938 | 0.214 | 0.388 |
+| **in-domain FT (+ class weights)** | 0.850 | **0.262** | **0.439** |
+| paper SOTA (in-domain + pesos) | ~0.92 | **0.295** | — |
 
-Per-ato do FT: `informar` 0.967, `perguntar` 0.96, **e todo o resto 0.0**. O modelo **colapsou na
-classe majoritária** — accuracy disparou (notícia é quase toda informar), mas macro-F1 mal mexeu e o
-coarse até piorou. Os resultados do paper usam `weights_True` (class weights) pra chegar nos 0.295;
-nosso trainer **não tem peso de classe** → colapsou.
+Sem pesos: `informar` 0.967, `perguntar` 0.96, **resto 0.0** → **colapso na classe majoritária**
+(accuracy alta, macro-F1 parado, coarse piora). Os resultados do paper usam `weights_True`.
 
-**Conclusão:** in-domain sozinho **não é o fix** — o gargalo é **desbalanço**, não domínio (confirma
-"class imbalance is the killer"). O pipeline aprende in-domain (informar/perguntar ~0.96), a
-arquitetura é sã. O lever real (serve p/ sintético E in-domain): **class weights / focal loss / dado
-rebalanceado**. Próximo passo concreto: adicionar peso de classe ao trainer e re-rodar.
+Com `--class-weights` (commit que adiciona `WeightedTrainer`, loss inverse-frequency): macro-F1
+**0.214→0.262** (fino) e **0.388→0.439** (coarse, melhor número até agora); atos raros saem do zero
+(`sugerir` 0.31, `discordar` 0.19). Accuracy cai (0.94→0.85) — o peso troca acerto da maioria por
+cobertura das minorias (por isso macro-F1 é a métrica, não accuracy). **~89% do SOTA do paper
+(0.262/0.295), só com o conserto da loss — sem trabalho de dado.** Os 0.0 restantes (agradecer/
+prometer/pedir/expressar_emocao) são em boa parte atos quase ausentes em notícia (poucos positivos
+no teste), não puro erro.
+
+**Conclusão:** o gargalo era **desbalanço, não domínio** (confirma "class imbalance is the killer").
+A loss ponderada deu +0.05 macro sozinha. O mesmo `--class-weights` deve ajudar o **modelo de
+produção (sintético)** nos atos raros — **sem depender da regen/chave de API**. Próximo: retreinar
+o sintético com `--class-weights` e reavaliar zero-shot.
 
 **O que os números dizem (baseline zero-shot):**
 - O **sinal de intenção primitiva** (assertivo 0.94, pergunta 0.62) é **sólido pros atos dominantes** —
