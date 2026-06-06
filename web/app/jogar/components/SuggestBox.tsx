@@ -38,6 +38,7 @@ export default function SuggestBox({ onSubmit }: { onSubmit: (t: string) => void
         <input
           className="field-input"
           value={t}
+          maxLength={200}
           onChange={(e) => setT(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
           placeholder="mesma intenção, outras palavras…"
