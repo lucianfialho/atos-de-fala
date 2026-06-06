@@ -8,6 +8,7 @@ dependencies = ["pyyaml>=6.0"]
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 gen = ["requests>=2.31"]
+collect = ["psycopg[binary]>=3.1,<4"]
 ml = [
     "torch>=2.2",
     "transformers>=4.44,<5",  # 5.x changed fast-tokenizer/API; our code targets 4.x (wiki: API churn)
