@@ -49,7 +49,7 @@ Seeded from `myFirstSmallModel` on 2026-06-04 — fine-tuning / language-model s
 - [Competitive Research Discipline](wiki/concepts/competitive-research-discipline.md) — Sempre buscar HF/GitHub ANTES de construir modelo novo
 - [Teacher-Mixture Generation Pipeline](wiki/concepts/teacher-mixture-pipeline.md) — MiniMax bulk + Claude adjudicador, agreement gate, orquestração pura; produz JSONL gold pra destilação
 
-### Speech Acts (chomsky project)
+### Speech Acts (atos project)
 - [Speech Act Theory](wiki/concepts/speech-act-theory.md) — Austin/Searle; força ilocucionária; 5 macro-classes — base teórica do modelo
 - [ISO 24617-2 Dialogue Acts](wiki/concepts/iso-24617-2-dialogue-acts.md) — padrão de anotação; functional segments, GPFs, 9 dimensões — fonte da taxonomia
 - [Chomsky vs Pragmatics](wiki/concepts/chomsky-vs-pragmatics.md) — por que o modelo é pragmática (Searle), não sintaxe (Chomsky); o nome é homenagem
@@ -58,7 +58,7 @@ Seeded from `myFirstSmallModel` on 2026-06-04 — fine-tuning / language-model s
 ## Entities
 - [ISO 24617-2 / DiAML](wiki/entities/iso-24617-2.md) — padrão ISO de dialogue acts; GPFs + social obligations = nosso label set
 - [BERTimbau](wiki/entities/bertimbau.md) — BERT monolíngue PT-BR (neuralmind); backbone do student (Plano 3)
-- [Noam Chomsky](wiki/entities/noam-chomsky.md) — linguista; o projeto leva seu nome, mas usa o método que ele rejeitava
+- [Noam Chomsky](wiki/entities/noam-atos.md) — linguista; o projeto leva seu nome, mas usa o método que ele rejeitava
 - [Porttinari speech-act corpus](wiki/entities/porttinari-corpus.md) — corpus PT-BR de speech acts (CC); holdout real pro Plano 3
 - [TinyStories Dataset](wiki/entities/tiny-stories-dataset.md) — 2.1M GPT-4 generated children's stories; domain-restricted corpus
 - [GPT2 Tokenizer](wiki/entities/gpt2-tokenizer.md) — BPE tokenizer via tiktoken; vocab_size=50,257

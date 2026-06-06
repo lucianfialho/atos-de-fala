@@ -4,16 +4,16 @@ Honeypots are the "iscas" — items with a known-correct answer used to score an
 reliability. They must be unambiguous, so they are hand-authored here (NOT sampled from the
 unverified synthetic dataset). Quotes are resolved to char offsets and validated against the
 frozen taxonomy via the project's own gold machinery, guaranteeing correct, non-overlapping,
-in-taxonomy spans. Output is the offset-Annotation JSONL that `chomsky.collect export
---honeypots` (and `chomsky.train.data.load_jsonl`) consume.
+in-taxonomy spans. Output is the offset-Annotation JSONL that `atos.collect export
+--honeypots` (and `atos.train.data.load_jsonl`) consume.
 
     .venv/bin/python scripts/gen_honeypots.py            # -> gold/honeypots.jsonl
 """
 import json
 import os
 import sys
-from chomsky.gold import compile_gold
-from chomsky.taxonomy import load_taxonomy
+from atos.gold import compile_gold
+from atos.taxonomy import load_taxonomy
 
 # (text, [(quote, act)]) — every quote is an exact substring of its text.
 ROWS = [

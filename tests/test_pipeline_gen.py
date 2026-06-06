@@ -1,6 +1,6 @@
-from chomsky.gen.pipeline import process_example, ExampleResult
-from chomsky.schema import Span
-from chomsky.taxonomy import Taxonomy
+from atos.gen.pipeline import process_example, ExampleResult
+from atos.schema import Span
+from atos.taxonomy import Taxonomy
 
 TAX = Taxonomy(
     acts=["saudar", "pedir", "sugerir"],

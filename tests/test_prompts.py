@@ -1,5 +1,5 @@
 import pytest
-from chomsky.gen.prompts import (
+from atos.gen.prompts import (
     parse_llm_json,
     build_generation_prompt,
     build_annotation_prompt,
@@ -52,7 +52,7 @@ def test_build_annotation_prompt_includes_text():
 
 
 def test_build_adjudication_prompt_includes_problems_and_text():
-    from chomsky.gen.prompts import build_adjudication_prompt
+    from atos.gen.prompts import build_adjudication_prompt
     msgs = build_adjudication_prompt("RUBRICA", "Bom dia!", ["illegal act: 'xingar'"])
     joined = " ".join(m["content"] for m in msgs)
     assert "RUBRICA" in joined

@@ -1,6 +1,6 @@
 ---
 type: source
-tags: [speech-acts, portuguese, bertimbau, iso-24617-2, corpus, class-imbalance, chomsky-project]
+tags: [speech-acts, portuguese, bertimbau, iso-24617-2, corpus, class-imbalance, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -15,10 +15,10 @@ updated: 2026-06-05
 
 ## Summary
 
-The closest prior work to chomsky: builds the **first PT-BR corpus annotated with speech acts**
+The closest prior work to atos: builds the **first PT-BR corpus annotated with speech acts**
 (a 50% sample of Porttinari-base news: 536 news / 4,091 sentences), using an **adapted ISO 24617-2**
 taxonomy, and fine-tunes **BERTimbau-large** to classify them. Annotation is **sentence-level**
-(one act per sentence) — not span-level, so chomsky's per-span granularity remains novel.
+(one act per sentence) — not span-level, so atos's per-span granularity remains novel.
 
 ## Key Takeaways
 

@@ -1,5 +1,5 @@
-from chomsky.train.decode import bioes_tags_to_spans
-from chomsky.schema import Span
+from atos.train.decode import bioes_tags_to_spans
+from atos.schema import Span
 
 
 def test_single_S_tag():

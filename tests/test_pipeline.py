@@ -1,7 +1,7 @@
-from chomsky.resolve import resolve_quoted_spans
-from chomsky.validator import validate
-from chomsky.bioes import char_spans_to_bioes
-from chomsky.taxonomy import load_taxonomy
+from atos.resolve import resolve_quoted_spans
+from atos.validator import validate
+from atos.bioes import char_spans_to_bioes
+from atos.taxonomy import load_taxonomy
 
 
 def test_resolve_validate_bioes_pipeline():

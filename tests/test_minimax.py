@@ -1,5 +1,5 @@
 import pytest
-from chomsky.gen.minimax import MiniMaxClient
+from atos.gen.minimax import MiniMaxClient
 
 
 def test_extract_content_pulls_message_text():
@@ -34,7 +34,7 @@ def test_complete_posts_and_returns_content(monkeypatch):
         captured["json"] = json
         return FakeResp()
 
-    monkeypatch.setattr("chomsky.gen.minimax.requests.post", fake_post)
+    monkeypatch.setattr("atos.gen.minimax.requests.post", fake_post)
     client = MiniMaxClient(api_key="KEY", model="MiniMax-Text-01")
     out = client.complete([{"role": "user", "content": "oi"}])
     assert out == "ola"

@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [bertimbau, lora, token-classification, speech-acts, chomsky-project]
+tags: [bertimbau, lora, token-classification, speech-acts, atos-project]
 sources: 0
 updated: 2026-06-04
 ---

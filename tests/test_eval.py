@@ -1,11 +1,11 @@
-from chomsky.eval import (
+from atos.eval import (
     span_prf1,
     per_act_f1,
     coarsen,
     dominant_act,
     sentence_label_f1,
 )
-from chomsky.schema import Annotation, Span
+from atos.schema import Annotation, Span
 
 MACRO = {
     "informar": "assertivo", "concordar": "assertivo", "discordar": "assertivo",

@@ -1,5 +1,5 @@
 import json
-from chomsky.annotate import read_rows, write_rows
+from atos.annotate import read_rows, write_rows
 
 
 def test_read_rows_missing_file(tmp_path):
@@ -29,6 +29,6 @@ def test_write_then_read_roundtrip_and_sanitizes(tmp_path):
 
 
 def test_html_and_acts_wired():
-    import chomsky.annotate as A
+    import atos.annotate as A
     assert "<!doctype html>" in A._HTML.lower()
     assert "/api/save" in A._HTML and "/api/state" in A._HTML

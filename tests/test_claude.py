@@ -1,5 +1,5 @@
 import pytest
-from chomsky.gen.claude import ClaudeClient
+from atos.gen.claude import ClaudeClient
 
 
 def test_extract_content_joins_text_blocks():
@@ -30,7 +30,7 @@ def test_complete_posts_system_separately(monkeypatch):
         captured["json"] = json
         return FakeResp()
 
-    monkeypatch.setattr("chomsky.gen.claude.requests.post", fake_post)
+    monkeypatch.setattr("atos.gen.claude.requests.post", fake_post)
     client = ClaudeClient(api_key="KEY", model="claude-sonnet-4-6")
     msgs = [
         {"role": "system", "content": "SYS"},

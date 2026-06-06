@@ -1,5 +1,5 @@
-from chomsky.resolve import resolve_quoted_spans
-from chomsky.schema import Span
+from atos.resolve import resolve_quoted_spans
+from atos.schema import Span
 
 
 def test_malformed_item_reports_error_without_crashing():

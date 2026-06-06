@@ -1,4 +1,4 @@
-from chomsky.collect.cli import build_arg_parser
+from atos.collect.cli import build_arg_parser
 
 
 def test_parser_exposes_all_subcommands():

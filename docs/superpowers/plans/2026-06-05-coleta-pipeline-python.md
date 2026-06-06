@@ -1,4 +1,4 @@
-# Coleta Colaborativa — Plano 1: Pipeline Python (`chomsky.collect`) + Schema
+# Coleta Colaborativa — Plano 1: Pipeline Python (`atos.collect`) + Schema
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -6,26 +6,26 @@
 
 **Architecture:** Lógica pura (seleção, agregação ponderada, pontuação, percepção, confirmação de paráfrase) em funções testáveis sem banco, no estilo do `agreement.py`/`eval.py` existentes. Um adaptador fino `db.py` (psycopg) faz o I/O e é testado por integração (pulado sem `$TEST_DATABASE_URL`). O schema vive em `db/schema.sql`, aplicado pelo web app e lido pelo Python.
 
-**Tech Stack:** Python 3.10, pytest, psycopg 3, Postgres (Neon), reuso de `chomsky.schema`/`chomsky.agreement`/`chomsky.gen` (DeepSeek adjudicador).
+**Tech Stack:** Python 3.10, pytest, psycopg 3, Postgres (Neon), reuso de `atos.schema`/`atos.agreement`/`atos.gen` (DeepSeek adjudicador).
 
 ---
 
 ## File Structure
 
 - `db/schema.sql` — **contrato compartilhado**: tabelas participant, item, item_span, span_gold, vote, suggestion, participant_stats.
-- `src/chomsky/collect/__init__.py` — pacote.
-- `src/chomsky/collect/models.py` — dataclasses de interchange (`Vote`, `SpanResolution`).
-- `src/chomsky/collect/select.py` — puro: `build_items()` (Annotation → linhas item/span; marca honeypot+gold).
-- `src/chomsky/collect/score.py` — puro: `streak_multiplier`, `points_for_vote`, `update_reliability`, constantes de pontos.
-- `src/chomsky/collect/aggregate.py` — puro: `resolve_span()` (voto majoritário ponderado por confiabilidade → ato + concordância + is_gold).
-- `src/chomsky/collect/perception.py` — puro: `act_distribution_by_group()`, `groups_disagree()`.
-- `src/chomsky/collect/confirm.py` — orquestra confirmação de paráfrase via DeepSeek (`build_paraphrase_check_prompt`, `confirm_suggestion`).
-- `src/chomsky/collect/db.py` — adaptador psycopg fino (I/O).
-- `src/chomsky/collect/cli.py` — subcomandos export/ingest/aggregate/confirm/perception.
+- `src/atos/collect/__init__.py` — pacote.
+- `src/atos/collect/models.py` — dataclasses de interchange (`Vote`, `SpanResolution`).
+- `src/atos/collect/select.py` — puro: `build_items()` (Annotation → linhas item/span; marca honeypot+gold).
+- `src/atos/collect/score.py` — puro: `streak_multiplier`, `points_for_vote`, `update_reliability`, constantes de pontos.
+- `src/atos/collect/aggregate.py` — puro: `resolve_span()` (voto majoritário ponderado por confiabilidade → ato + concordância + is_gold).
+- `src/atos/collect/perception.py` — puro: `act_distribution_by_group()`, `groups_disagree()`.
+- `src/atos/collect/confirm.py` — orquestra confirmação de paráfrase via DeepSeek (`build_paraphrase_check_prompt`, `confirm_suggestion`).
+- `src/atos/collect/db.py` — adaptador psycopg fino (I/O).
+- `src/atos/collect/cli.py` — subcomandos export/ingest/aggregate/confirm/perception.
 - `tests/test_collect_*.py` — testes unitários puros.
 - `tests/integration/test_collect_db.py` — integração (skip sem `$TEST_DATABASE_URL`).
 
-Cada arquivo fica bem abaixo do gate de 150 linhas. Rode os testes com `.venv/bin/python -m pytest` (o python do sistema não tem o pacote `chomsky`).
+Cada arquivo fica bem abaixo do gate de 150 linhas. Rode os testes com `.venv/bin/python -m pytest` (o python do sistema não tem o pacote `atos`).
 
 ---
 
@@ -153,14 +153,14 @@ git commit -m "feat(collect): shared Postgres schema (collection contract)"
 ### Task 2: Pacote + modelos de interchange
 
 **Files:**
-- Create: `src/chomsky/collect/__init__.py`, `src/chomsky/collect/models.py`
+- Create: `src/atos/collect/__init__.py`, `src/atos/collect/models.py`
 - Test: `tests/test_collect_models.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_models.py
-from chomsky.collect.models import Vote, SpanResolution
+from atos.collect.models import Vote, SpanResolution
 
 
 def test_vote_is_frozen_and_holds_fields():
@@ -176,16 +176,16 @@ def test_span_resolution_holds_fields():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_models.py -v`
-Expected: FAIL with "No module named 'chomsky.collect'".
+Expected: FAIL with "No module named 'atos.collect'".
 
 - [ ] **Step 3: Write the package and models**
 
 ```python
-# src/chomsky/collect/__init__.py
+# src/atos/collect/__init__.py
 ```
 
 ```python
-# src/chomsky/collect/models.py
+# src/atos/collect/models.py
 from dataclasses import dataclass
 from typing import Optional
 
@@ -214,7 +214,7 @@ Expected: PASS (2 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/collect/__init__.py src/chomsky/collect/models.py tests/test_collect_models.py
+git add src/atos/collect/__init__.py src/atos/collect/models.py tests/test_collect_models.py
 git commit -m "feat(collect): interchange dataclasses (Vote, SpanResolution)"
 ```
 
@@ -223,15 +223,15 @@ git commit -m "feat(collect): interchange dataclasses (Vote, SpanResolution)"
 ### Task 3: Construção de lote (`select.build_items`)
 
 **Files:**
-- Create: `src/chomsky/collect/select.py`
+- Create: `src/atos/collect/select.py`
 - Test: `tests/test_collect_select.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_select.py
-from chomsky.collect.select import build_items
-from chomsky.schema import Annotation, Span
+from atos.collect.select import build_items
+from atos.schema import Annotation, Span
 
 
 def test_build_items_maps_annotation_to_item_with_spans():
@@ -254,19 +254,19 @@ def test_build_items_marks_honeypot_spans_with_gold_act():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_select.py -v`
-Expected: FAIL with "No module named 'chomsky.collect.select'".
+Expected: FAIL with "No module named 'atos.collect.select'".
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/chomsky/collect/select.py
+# src/atos/collect/select.py
 """Turn AI-annotated texts (and honeypot gold) into item rows for the collection DB.
 
 A normal item carries the model's spans/acts for players to judge. A honeypot item is a
 high-agreement gold annotation whose span.act IS the known answer used to score voter
 reliability — so each honeypot span also emits `gold_act`. Pure transform: no DB here."""
 from typing import Dict, List
-from chomsky.schema import Annotation
+from atos.schema import Annotation
 
 
 def _item_row(ann: Annotation, is_honeypot: bool) -> Dict:
@@ -292,7 +292,7 @@ Expected: PASS (2 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/collect/select.py tests/test_collect_select.py
+git add src/atos/collect/select.py tests/test_collect_select.py
 git commit -m "feat(collect): build_items (annotations + honeypots -> item rows)"
 ```
 
@@ -301,14 +301,14 @@ git commit -m "feat(collect): build_items (annotations + honeypots -> item rows)
 ### Task 4: Pontuação (`score`)
 
 **Files:**
-- Create: `src/chomsky/collect/score.py`
+- Create: `src/atos/collect/score.py`
 - Test: `tests/test_collect_score.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_score.py
-from chomsky.collect.score import (
+from atos.collect.score import (
     streak_multiplier, points_for_vote, update_reliability,
     POINTS_SUGGESTION, POINTS_SUGGESTION_CONFIRMED,
 )
@@ -345,12 +345,12 @@ def test_update_reliability_is_clamped():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_score.py -v`
-Expected: FAIL with "No module named 'chomsky.collect.score'".
+Expected: FAIL with "No module named 'atos.collect.score'".
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/chomsky/collect/score.py
+# src/atos/collect/score.py
 """Scoring + reliability. Suggestions are an OPTIONAL bonus and never penalize. The only
 downward pressure is the honeypot: getting a known-answer item wrong lowers reliability,
 which is the WEIGHT a voter's votes get in aggregation (see aggregate.resolve_span)."""
@@ -386,7 +386,7 @@ Expected: PASS (5 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/collect/score.py tests/test_collect_score.py
+git add src/atos/collect/score.py tests/test_collect_score.py
 git commit -m "feat(collect): scoring + honeypot-driven reliability"
 ```
 
@@ -395,15 +395,15 @@ git commit -m "feat(collect): scoring + honeypot-driven reliability"
 ### Task 5: Agregação ponderada (`aggregate.resolve_span`)
 
 **Files:**
-- Create: `src/chomsky/collect/aggregate.py`
+- Create: `src/atos/collect/aggregate.py`
 - Test: `tests/test_collect_aggregate.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_aggregate.py
-from chomsky.collect.aggregate import resolve_span
-from chomsky.collect.models import Vote
+from atos.collect.aggregate import resolve_span
+from atos.collect.models import Vote
 
 
 def test_unanimous_agree_resolves_to_ai_act_as_gold():
@@ -437,12 +437,12 @@ def test_no_votes_returns_empty_resolution():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_aggregate.py -v`
-Expected: FAIL with "No module named 'chomsky.collect.aggregate'".
+Expected: FAIL with "No module named 'atos.collect.aggregate'".
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/chomsky/collect/aggregate.py
+# src/atos/collect/aggregate.py
 """Weighted majority over the act each vote endorses, weighting by voter reliability.
 
 agree -> endorses the AI's act. disagree+corrected -> endorses the corrected act.
@@ -450,7 +450,7 @@ disagree without a correction -> endorses NO act (adds to the total weight, so i
 the winning act's share). A span becomes gold when the winning act's weighted share
 reaches `threshold`."""
 from typing import Dict, List
-from chomsky.collect.models import Vote, SpanResolution
+from atos.collect.models import Vote, SpanResolution
 
 
 def resolve_span(ai_act: str, votes: List[Vote], threshold: float = 0.66) -> SpanResolution:
@@ -479,7 +479,7 @@ Expected: PASS (4 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/collect/aggregate.py tests/test_collect_aggregate.py
+git add src/atos/collect/aggregate.py tests/test_collect_aggregate.py
 git commit -m "feat(collect): reliability-weighted span resolution + gold gate"
 ```
 
@@ -488,14 +488,14 @@ git commit -m "feat(collect): reliability-weighted span resolution + gold gate"
 ### Task 6: Análise de percepção (`perception`)
 
 **Files:**
-- Create: `src/chomsky/collect/perception.py`
+- Create: `src/atos/collect/perception.py`
 - Test: `tests/test_collect_perception.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_perception.py
-from chomsky.collect.perception import act_distribution_by_group, groups_disagree
+from atos.collect.perception import act_distribution_by_group, groups_disagree
 
 
 def test_distribution_counts_acts_per_group():
@@ -521,12 +521,12 @@ def test_groups_disagree_false_when_modal_act_matches():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_perception.py -v`
-Expected: FAIL with "No module named 'chomsky.collect.perception'".
+Expected: FAIL with "No module named 'atos.collect.perception'".
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/chomsky/collect/perception.py
+# src/atos/collect/perception.py
 """The research output: do different demographic groups perceive different acts on the
 SAME contested span? `records` are per-vote chosen acts tagged with a demographic axis
 value (built from votes + participant rows). Pure functions over plain dicts."""
@@ -560,7 +560,7 @@ Expected: PASS (3 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/collect/perception.py tests/test_collect_perception.py
+git add src/atos/collect/perception.py tests/test_collect_perception.py
 git commit -m "feat(collect): perception analysis (act distribution by demographic)"
 ```
 
@@ -569,14 +569,14 @@ git commit -m "feat(collect): perception analysis (act distribution by demograph
 ### Task 7: Confirmação de paráfrase via DeepSeek (`confirm`)
 
 **Files:**
-- Create: `src/chomsky/collect/confirm.py`
+- Create: `src/atos/collect/confirm.py`
 - Test: `tests/test_collect_confirm.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_confirm.py
-from chomsky.collect.confirm import build_paraphrase_check_prompt, confirm_suggestion
+from atos.collect.confirm import build_paraphrase_check_prompt, confirm_suggestion
 
 
 class FakeClient:
@@ -613,17 +613,17 @@ def test_confirm_false_when_key_missing():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_confirm.py -v`
-Expected: FAIL with "No module named 'chomsky.collect.confirm'".
+Expected: FAIL with "No module named 'atos.collect.confirm'".
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/chomsky/collect/confirm.py
+# src/atos/collect/confirm.py
 """Confirm that a player's paraphrase preserves the span's speech act, using the same LLM
 adjudicator family as generation. `client` is any object with .complete(messages)->str
-(e.g. chomsky.gen.deepseek.DeepSeekClient), so tests inject a fake."""
+(e.g. atos.gen.deepseek.DeepSeekClient), so tests inject a fake."""
 from typing import Callable, Dict, List
-from chomsky.gen.prompts import parse_llm_json
+from atos.gen.prompts import parse_llm_json
 
 
 def build_paraphrase_check_prompt(act: str, original: str, paraphrase: str) -> List[Dict]:
@@ -654,7 +654,7 @@ Expected: PASS (4 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/collect/confirm.py tests/test_collect_confirm.py
+git add src/atos/collect/confirm.py tests/test_collect_confirm.py
 git commit -m "feat(collect): paraphrase confirmation via DeepSeek adjudicator"
 ```
 
@@ -663,7 +663,7 @@ git commit -m "feat(collect): paraphrase confirmation via DeepSeek adjudicator"
 ### Task 8: Adaptador de banco (`db`) + dependência psycopg
 
 **Files:**
-- Create: `src/chomsky/collect/db.py`
+- Create: `src/atos/collect/db.py`
 - Modify: `pyproject.toml` (add `psycopg[binary]>=3.1,<4` to dependencies)
 - Test: `tests/integration/test_collect_db.py` (extend from Task 1)
 
@@ -687,9 +687,9 @@ Expected: "Successfully installed psycopg...".
 def test_insert_items_and_fetch_votes_roundtrip():
     import uuid
     import psycopg
-    from chomsky.collect.db import insert_items, fetch_votes_by_span
-    from chomsky.collect.select import build_items
-    from chomsky.schema import Annotation, Span
+    from atos.collect.db import insert_items, fetch_votes_by_span
+    from atos.collect.select import build_items
+    from atos.schema import Annotation, Span
 
     with psycopg.connect(DSN) as conn:
         _apply_schema(conn)
@@ -713,18 +713,18 @@ def test_insert_items_and_fetch_votes_roundtrip():
 - [ ] **Step 3: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/integration/test_collect_db.py -v`
-Expected: SKIPPED without `TEST_DATABASE_URL`; with it set, FAIL with "No module named 'chomsky.collect.db'".
+Expected: SKIPPED without `TEST_DATABASE_URL`; with it set, FAIL with "No module named 'atos.collect.db'".
 
 - [ ] **Step 4: Write the implementation**
 
 ```python
-# src/chomsky/collect/db.py
+# src/atos/collect/db.py
 """Thin psycopg adapter — the only module that touches Postgres. Keep SQL here so the
 logic modules stay pure and unit-testable. Connection comes from DATABASE_URL."""
 import os
 from typing import Dict, List, Optional, Tuple
 import psycopg
-from chomsky.collect.models import Vote
+from atos.collect.models import Vote
 
 
 def connect(dsn: Optional[str] = None):
@@ -806,7 +806,7 @@ Expected: SKIPPED without `TEST_DATABASE_URL`; PASS with it set against a fresh 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/chomsky/collect/db.py tests/integration/test_collect_db.py pyproject.toml
+git add src/atos/collect/db.py tests/integration/test_collect_db.py pyproject.toml
 git commit -m "feat(collect): psycopg DB adapter (insert items, fetch votes/perception/suggestions)"
 ```
 
@@ -815,14 +815,14 @@ git commit -m "feat(collect): psycopg DB adapter (insert items, fetch votes/perc
 ### Task 9: CLI (`cli`) ligando tudo
 
 **Files:**
-- Create: `src/chomsky/collect/cli.py`, `src/chomsky/collect/__main__.py`
+- Create: `src/atos/collect/cli.py`, `src/atos/collect/__main__.py`
 - Test: `tests/test_collect_cli.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_collect_cli.py
-from chomsky.collect.cli import build_arg_parser
+from atos.collect.cli import build_arg_parser
 
 
 def test_parser_exposes_all_subcommands():
@@ -845,12 +845,12 @@ def test_perception_requires_axis_with_default():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/test_collect_cli.py -v`
-Expected: FAIL with "No module named 'chomsky.collect.cli'".
+Expected: FAIL with "No module named 'atos.collect.cli'".
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/chomsky/collect/cli.py
+# src/atos/collect/cli.py
 """Offline pipeline entrypoint. Reads DATABASE_URL. Subcommands:
   export   --dataset PATH --honeypots PATH   build items from JSONL annotations -> DB
   ingest                                      print vote counts per span (sanity)
@@ -860,14 +860,14 @@ Expected: FAIL with "No module named 'chomsky.collect.cli'".
 """
 import argparse
 import json
-from chomsky.collect import db
-from chomsky.collect.aggregate import resolve_span
-from chomsky.collect.perception import act_distribution_by_group, groups_disagree
-from chomsky.collect.confirm import confirm_suggestion
+from atos.collect import db
+from atos.collect.aggregate import resolve_span
+from atos.collect.perception import act_distribution_by_group, groups_disagree
+from atos.collect.confirm import confirm_suggestion
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="chomsky.collect", description="Coleta colaborativa — pipeline offline.")
+    p = argparse.ArgumentParser(prog="atos.collect", description="Coleta colaborativa — pipeline offline.")
     sub = p.add_subparsers(dest="command", required=True)
     e = sub.add_parser("export"); e.add_argument("--dataset", required=True); e.add_argument("--honeypots", default=None)
     sub.add_parser("ingest")
@@ -878,7 +878,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def _load_annotations(path):
-    from chomsky.train.data import load_jsonl
+    from atos.train.data import load_jsonl
     return load_jsonl(path)
 
 
@@ -886,7 +886,7 @@ def main(argv=None) -> int:
     args = build_arg_parser().parse_args(argv)
     conn = db.connect()
     if args.command == "export":
-        from chomsky.collect.select import build_items
+        from atos.collect.select import build_items
         anns = _load_annotations(args.dataset)
         hps = _load_annotations(args.honeypots) if args.honeypots else []
         ids = db.insert_items(conn, build_items(anns, hps))
@@ -905,7 +905,7 @@ def main(argv=None) -> int:
                     f.write(json.dumps({"span_id": span_id, "act": r.act, "agreement": r.agreement}, ensure_ascii=False) + "\n")
         print(json.dumps({"gold_spans": gold}))
     elif args.command == "confirm":
-        from chomsky.gen.deepseek import DeepSeekClient
+        from atos.gen.deepseek import DeepSeekClient
         client = DeepSeekClient()
         n_ok = 0
         for s in db.fetch_pending_suggestions(conn):
@@ -925,8 +925,8 @@ if __name__ == "__main__":
 ```
 
 ```python
-# src/chomsky/collect/__main__.py
-from chomsky.collect.cli import main
+# src/atos/collect/__main__.py
+from atos.collect.cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())
@@ -945,7 +945,7 @@ Expected: all green (existing 108 + the new unit tests; DB integration SKIPPED w
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/chomsky/collect/cli.py src/chomsky/collect/__main__.py tests/test_collect_cli.py
+git add src/atos/collect/cli.py src/atos/collect/__main__.py tests/test_collect_cli.py
 git commit -m "feat(collect): CLI (export/ingest/aggregate/confirm/perception)"
 ```
 
@@ -962,7 +962,7 @@ git commit -m "feat(collect): CLI (export/ingest/aggregate/confirm/perception)"
 - honeypots + reliability → Task 1 (`span_gold`) + Task 4 (`update_reliability`) + Task 5 (weighting). ✓
 - scoring (points/streak/suggestion bonus) → Task 4. ✓
 - Postgres schema (contract) → Task 1. ✓
-- Reuse of `chomsky` (schema/agreement/gen) → schema.Annotation/Span in Tasks 3/5/8; gen.prompts.parse_llm_json + gen.deepseek in Task 7/9. (Note: `agreement.span_agreement` is available for an optional richer report but not required by these tasks; the weighted act-vote in Task 5 is the v1 metric.)
+- Reuse of `atos` (schema/agreement/gen) → schema.Annotation/Span in Tasks 3/5/8; gen.prompts.parse_llm_json + gen.deepseek in Task 7/9. (Note: `agreement.span_agreement` is available for an optional richer report but not required by these tasks; the weighted act-vote in Task 5 is the v1 metric.)
 
 **Serving / next-item:** intentionally NOT here — it is per-request logic that lives in the web app (Plan 2). This plan exposes the data the app needs (`is_honeypot`, `span_gold`) and ingests what it writes.
 

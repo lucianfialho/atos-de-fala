@@ -14,7 +14,7 @@
 
 ## File Structure
 
-App separado em `web/` (monorepo-lite; o pacote Python continua em `src/chomsky`):
+App separado em `web/` (monorepo-lite; o pacote Python continua em `src/atos`):
 
 - `web/package.json`, `web/tsconfig.json`, `web/next.config.mjs`, `web/vitest.config.ts` — scaffold.
 - `web/lib/scoring.ts` — **espelho do `score.py`**: `streakMultiplier`, `pointsForVote`, `updateReliability`, `applyItemOutcome`, constantes.
@@ -157,7 +157,7 @@ Expected: FAIL — cannot find module `./scoring`.
 
 ```typescript
 // web/lib/scoring.ts
-// Mirror of src/chomsky/collect/score.py — keep values identical so client display and
+// Mirror of src/atos/collect/score.py — keep values identical so client display and
 // server-side stats agree with the Python aggregation. Suggestions never penalize.
 
 export const POINTS_VOTE_BASE = 10;
@@ -406,7 +406,7 @@ git commit -m "feat(web): Neon client + schema migration runner"
 // web/lib/participant.ts
 "use client";
 // Anonymous identity: a uuid persisted in localStorage. No login.
-const KEY = "chomsky_participant_id";
+const KEY = "atos_participant_id";
 
 export function getOrCreateParticipantId(): string {
   let id = localStorage.getItem(KEY);
@@ -553,7 +553,7 @@ export async function GET(req: Request) {
 
 - [ ] **Step 2: Verify (integration)**
 
-After seeding at least one item (via the Python `chomsky.collect export`, Plano 1 Task 9):
+After seeding at least one item (via the Python `atos.collect export`, Plano 1 Task 9):
 Run: `curl "http://localhost:3000/api/next-item?participant=<uuid>"`
 Expected: JSON with `item.text` and an ordered `spans` array (or `{"item":null}` if none left).
 
@@ -828,7 +828,7 @@ git commit -m "feat(web): game screen (evaluate spans + suggest, score/streak, n
 ## Setup local
 1. `cd web && npm install`
 2. `DATABASE_URL=... npm run migrate`   # aplica ../db/schema.sql
-3. (no repo Python) semear itens: `python -m chomsky.collect export --dataset data/dataset.jsonl --honeypots gold/honeypots.jsonl`
+3. (no repo Python) semear itens: `python -m atos.collect export --dataset data/dataset.jsonl --honeypots gold/honeypots.jsonl`
 4. `DATABASE_URL=... npm run dev`        # http://localhost:3000
 
 ## Deploy
@@ -883,4 +883,4 @@ git commit -m "docs(web): env + deploy runbook (Vercel/Neon) + e2e checklist"
 
 **Type consistency:** `Stats {points,streak,reliability,itemsDone}` e `applyItemOutcome(stats,nSpans,honeypotCorrect)` idênticos em Tasks 2/8. `Candidate {id,isHoneypot,voteCount}` e `pickNextItem(candidates,itemsDone)` idênticos em Tasks 3/7. `ACTS` (13) usado em Tasks 4/10. Corpo do `vote` (`{participant,itemId,votes:[{spanId,verdict,correctedAct?}]}`) idêntico entre Task 8 (rota) e Task 10 (cliente). `sql` tagged-template de `@/lib/db` usado igual em todas as rotas.
 
-**Dependência entre planos:** Task 5/7 dependem do `db/schema.sql` (Plano 1 Task 1) e de itens semeados pelo `chomsky.collect export` (Plano 1 Task 9). Ordem recomendada: Plano 1 inteiro → Plano 2.
+**Dependência entre planos:** Task 5/7 dependem do `db/schema.sql` (Plano 1 Task 1) e de itens semeados pelo `atos.collect export` (Plano 1 Task 9). Ordem recomendada: Plano 1 inteiro → Plano 2.

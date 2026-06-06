@@ -6,7 +6,7 @@
 
 **Architecture:** API I/O lives only in thin client wrappers (`minimax.py`, `claude.py`) whose response *parsing* is unit-tested; the orchestration (`pipeline.py`) is a pure function that takes *injected annotator callables*, so the full generate→resolve→validate→agreement→adjudicate→accept flow is testable offline with fakes. Output is char-offset annotations (`{text, spans:[{start,end,act}]}`) as JSONL — tokenization + BIOES is deferred to Plan 3 (training), where the tokenizer lives. Everything stays config-driven on `config/taxonomy.yaml` + `config/rubric.md`.
 
-**Tech Stack:** Python ≥3.10, `requests` (HTTP to MiniMax + Anthropic), the existing `chomsky` package (schema, taxonomy, resolve, validator, agreement), `pytest` (tests monkeypatch `requests`, no live calls).
+**Tech Stack:** Python ≥3.10, `requests` (HTTP to MiniMax + Anthropic), the existing `atos` package (schema, taxonomy, resolve, validator, agreement), `pytest` (tests monkeypatch `requests`, no live calls).
 
 ---
 
@@ -21,11 +21,11 @@ This is **Plan 2 of 3** (see `docs/superpowers/specs/2026-06-04-speech-act-span-
 ## File Structure
 
 ```
-chomsky/
+atos/
 ├── pyproject.toml                  # MODIFY: add optional 'gen' deps (requests)
 ├── config/
 │   └── rubric.md                   # CREATE: provisional annotation rubric + few-shot
-├── src/chomsky/gen/
+├── src/atos/gen/
 │   ├── __init__.py
 │   ├── prompts.py                  # build prompts + parse_llm_json (robust JSON extraction)
 │   ├── minimax.py                  # MiniMaxClient: HTTP + _extract_content
@@ -43,7 +43,7 @@ chomsky/
 ```
 
 **Interfaces locked here:**
-- `prompts.parse_llm_json(raw: str) -> dict` → `{"text": str, "spans": [{"quote": str, "act": str}]}`; raises `ValueError` if unparseable. The `spans` items are exactly the input shape for `chomsky.resolve.resolve_quoted_spans`.
+- `prompts.parse_llm_json(raw: str) -> dict` → `{"text": str, "spans": [{"quote": str, "act": str}]}`; raises `ValueError` if unparseable. The `spans` items are exactly the input shape for `atos.resolve.resolve_quoted_spans`.
 - `prompts.build_generation_prompt(rubric: str, n: int) -> list[dict]` and `prompts.build_annotation_prompt(rubric: str, text: str) -> list[dict]` → chat `messages`.
 - `minimax.MiniMaxClient(api_key=None, model=..., base_url=...).complete(messages) -> str`; static `_extract_content(resp: dict) -> str`.
 - `claude.ClaudeClient(api_key=None, model=..., base_url=...).complete(messages) -> str`; static `_extract_content(resp: dict) -> str`.
@@ -56,7 +56,7 @@ chomsky/
 
 **Files:**
 - Modify: `pyproject.toml`
-- Create: `src/chomsky/gen/__init__.py`
+- Create: `src/atos/gen/__init__.py`
 
 - [ ] **Step 1: Add the `gen` optional dependency group to `pyproject.toml`**
 
@@ -71,15 +71,15 @@ gen = ["requests>=2.31"]
 - [ ] **Step 2: Create the subpackage marker**
 
 ```python
-# src/chomsky/gen/__init__.py
-"""chomsky.gen — synthetic speech-act dataset generation pipeline."""
+# src/atos/gen/__init__.py
+"""atos.gen — synthetic speech-act dataset generation pipeline."""
 ```
 
 - [ ] **Step 3: Install the new extras into the existing venv**
 
 Run:
 ```bash
-cd /Users/lucianfialho/Code/antiachismosocialclub/chomsky
+cd /Users/lucianfialho/Code/antiachismosocialclub/atos
 .venv/bin/pip install -q -e ".[dev,gen]"
 .venv/bin/python -c "import requests; print('requests', requests.__version__)"
 ```
@@ -88,8 +88,8 @@ Expected: prints a requests version (e.g. `requests 2.31.0` or newer).
 - [ ] **Step 4: Commit**
 
 ```bash
-git add pyproject.toml src/chomsky/gen/__init__.py
-git commit -m "chore: scaffold chomsky.gen subpackage + requests dep"
+git add pyproject.toml src/atos/gen/__init__.py
+git commit -m "chore: scaffold atos.gen subpackage + requests dep"
 ```
 
 ---
@@ -99,7 +99,7 @@ git commit -m "chore: scaffold chomsky.gen subpackage + requests dep"
 LLMs wrap JSON in prose or ```json fences. `parse_llm_json` must extract the JSON object and validate its shape.
 
 **Files:**
-- Create: `src/chomsky/gen/prompts.py`
+- Create: `src/atos/gen/prompts.py`
 - Test: `tests/test_prompts.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -107,7 +107,7 @@ LLMs wrap JSON in prose or ```json fences. `parse_llm_json` must extract the JSO
 ```python
 # tests/test_prompts.py
 import pytest
-from chomsky.gen.prompts import (
+from atos.gen.prompts import (
     parse_llm_json,
     build_generation_prompt,
     build_annotation_prompt,
@@ -162,12 +162,12 @@ def test_build_annotation_prompt_includes_text():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_prompts.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.gen.prompts'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.gen.prompts'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/gen/prompts.py
+# src/atos/gen/prompts.py
 from typing import Dict, List
 import json
 import re
@@ -239,7 +239,7 @@ Expected: PASS (7 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/gen/prompts.py tests/test_prompts.py
+git add src/atos/gen/prompts.py tests/test_prompts.py
 git commit -m "feat(gen): prompt builders + robust LLM JSON parsing"
 ```
 
@@ -250,7 +250,7 @@ git commit -m "feat(gen): prompt builders + robust LLM JSON parsing"
 Thin HTTP wrapper. Only the response-content extraction is unit-tested; the live POST is monkeypatched in tests.
 
 **Files:**
-- Create: `src/chomsky/gen/minimax.py`
+- Create: `src/atos/gen/minimax.py`
 - Test: `tests/test_minimax.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -258,7 +258,7 @@ Thin HTTP wrapper. Only the response-content extraction is unit-tested; the live
 ```python
 # tests/test_minimax.py
 import pytest
-from chomsky.gen.minimax import MiniMaxClient
+from atos.gen.minimax import MiniMaxClient
 
 
 def test_extract_content_pulls_message_text():
@@ -293,7 +293,7 @@ def test_complete_posts_and_returns_content(monkeypatch):
         captured["json"] = json
         return FakeResp()
 
-    monkeypatch.setattr("chomsky.gen.minimax.requests.post", fake_post)
+    monkeypatch.setattr("atos.gen.minimax.requests.post", fake_post)
     client = MiniMaxClient(api_key="KEY", model="MiniMax-Text-01")
     out = client.complete([{"role": "user", "content": "oi"}])
     assert out == "ola"
@@ -311,12 +311,12 @@ def test_missing_api_key_raises(monkeypatch):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_minimax.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.gen.minimax'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.gen.minimax'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/gen/minimax.py
+# src/atos/gen/minimax.py
 from typing import Dict, List, Optional
 import os
 import requests
@@ -378,7 +378,7 @@ Expected: PASS (4 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/gen/minimax.py tests/test_minimax.py
+git add src/atos/gen/minimax.py tests/test_minimax.py
 git commit -m "feat(gen): MiniMax HTTP client + content extraction"
 ```
 
@@ -389,7 +389,7 @@ git commit -m "feat(gen): MiniMax HTTP client + content extraction"
 Thin HTTP wrapper for the Anthropic Messages API. Same testing approach.
 
 **Files:**
-- Create: `src/chomsky/gen/claude.py`
+- Create: `src/atos/gen/claude.py`
 - Test: `tests/test_claude.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -397,7 +397,7 @@ Thin HTTP wrapper for the Anthropic Messages API. Same testing approach.
 ```python
 # tests/test_claude.py
 import pytest
-from chomsky.gen.claude import ClaudeClient
+from atos.gen.claude import ClaudeClient
 
 
 def test_extract_content_joins_text_blocks():
@@ -428,7 +428,7 @@ def test_complete_posts_system_separately(monkeypatch):
         captured["json"] = json
         return FakeResp()
 
-    monkeypatch.setattr("chomsky.gen.claude.requests.post", fake_post)
+    monkeypatch.setattr("atos.gen.claude.requests.post", fake_post)
     client = ClaudeClient(api_key="KEY", model="claude-sonnet-4-6")
     msgs = [
         {"role": "system", "content": "SYS"},
@@ -453,12 +453,12 @@ def test_missing_api_key_raises(monkeypatch):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_claude.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.gen.claude'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.gen.claude'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/gen/claude.py
+# src/atos/gen/claude.py
 from typing import Dict, List, Optional
 import os
 import requests
@@ -535,7 +535,7 @@ Expected: PASS (4 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/gen/claude.py tests/test_claude.py
+git add src/atos/gen/claude.py tests/test_claude.py
 git commit -m "feat(gen): Claude (Anthropic Messages) HTTP client + content extraction"
 ```
 
@@ -546,16 +546,16 @@ git commit -m "feat(gen): Claude (Anthropic Messages) HTTP client + content extr
 The heart of the teacher mixture, as a pure function with injected annotator callables. No network here.
 
 **Files:**
-- Create: `src/chomsky/gen/pipeline.py`
+- Create: `src/atos/gen/pipeline.py`
 - Test: `tests/test_pipeline_gen.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_pipeline_gen.py
-from chomsky.gen.pipeline import process_example, ExampleResult
-from chomsky.schema import Span
-from chomsky.taxonomy import Taxonomy
+from atos.gen.pipeline import process_example, ExampleResult
+from atos.schema import Span
+from atos.taxonomy import Taxonomy
 
 TAX = Taxonomy(
     acts=["saudar", "pedir", "sugerir"],
@@ -627,19 +627,19 @@ def test_low_agreement_without_adjudicator_is_rejected():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_pipeline_gen.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.gen.pipeline'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.gen.pipeline'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/gen/pipeline.py
+# src/atos/gen/pipeline.py
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
-from chomsky.schema import Annotation
-from chomsky.taxonomy import Taxonomy
-from chomsky.resolve import resolve_quoted_spans
-from chomsky.validator import validate
-from chomsky.agreement import span_agreement
+from atos.schema import Annotation
+from atos.taxonomy import Taxonomy
+from atos.resolve import resolve_quoted_spans
+from atos.validator import validate
+from atos.agreement import span_agreement
 
 Items = List[Dict]
 Annotator = Callable[[str], Items]
@@ -707,7 +707,7 @@ Expected: PASS (6 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/gen/pipeline.py tests/test_pipeline_gen.py
+git add src/atos/gen/pipeline.py tests/test_pipeline_gen.py
 git commit -m "feat(gen): pure teacher-mixture orchestration (process_example)"
 ```
 
@@ -718,15 +718,15 @@ git commit -m "feat(gen): pure teacher-mixture orchestration (process_example)"
 Append-each-with-flush (resume-from-disk discipline from the Privacy Filter BR lessons) and a loader that returns already-written texts so the CLI can resume without duplicates.
 
 **Files:**
-- Create: `src/chomsky/gen/dataset.py`
+- Create: `src/atos/gen/dataset.py`
 - Test: `tests/test_dataset.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_dataset.py
-from chomsky.gen.dataset import append_annotation, load_done_texts
-from chomsky.schema import Annotation, Span
+from atos.gen.dataset import append_annotation, load_done_texts
+from atos.schema import Annotation, Span
 
 
 def test_load_done_texts_missing_file_is_empty(tmp_path):
@@ -754,16 +754,16 @@ def test_each_record_is_one_json_line(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_dataset.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.gen.dataset'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.gen.dataset'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/gen/dataset.py
+# src/atos/gen/dataset.py
 import json
 import os
 from typing import Set
-from chomsky.schema import Annotation
+from atos.schema import Annotation
 
 
 def append_annotation(path: str, ann: Annotation) -> None:
@@ -796,7 +796,7 @@ Expected: PASS (3 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/gen/dataset.py tests/test_dataset.py
+git add src/atos/gen/dataset.py tests/test_dataset.py
 git commit -m "feat(gen): JSONL writer with fsync + resume loader"
 ```
 
@@ -807,7 +807,7 @@ git commit -m "feat(gen): JSONL writer with fsync + resume loader"
 Wires real clients into the pipeline. Generation is an integration concern; the unit check is that the module imports and `--help` works. A manual smoke step exercises the live path with 1 example.
 
 **Files:**
-- Create: `src/chomsky/gen/cli.py`
+- Create: `src/atos/gen/cli.py`
 - Create: `config/rubric.md`
 - Test: `tests/test_cli_smoke.py`
 
@@ -821,7 +821,7 @@ import sys
 
 def test_cli_help_runs():
     r = subprocess.run(
-        [sys.executable, "-m", "chomsky.gen.cli", "--help"],
+        [sys.executable, "-m", "atos.gen.cli", "--help"],
         capture_output=True,
         text=True,
     )
@@ -833,7 +833,7 @@ def test_cli_help_runs():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_cli_smoke.py -q`
-Expected: FAIL (module `chomsky.gen.cli` has no `__main__` / import error)
+Expected: FAIL (module `atos.gen.cli` has no `__main__` / import error)
 
 - [ ] **Step 3: Create the provisional rubric**
 
@@ -876,21 +876,21 @@ Texto: "Oi! Pode me mandar o relatório? Prometo revisar hoje."
 - [ ] **Step 4: Write the CLI implementation**
 
 ```python
-# src/chomsky/gen/cli.py
+# src/atos/gen/cli.py
 import argparse
 import os
 import sys
 from typing import List, Dict
-from chomsky.taxonomy import load_taxonomy
-from chomsky.gen.prompts import (
+from atos.taxonomy import load_taxonomy
+from atos.gen.prompts import (
     parse_llm_json,
     build_generation_prompt,
     build_annotation_prompt,
 )
-from chomsky.gen.minimax import MiniMaxClient
-from chomsky.gen.claude import ClaudeClient
-from chomsky.gen.pipeline import process_example
-from chomsky.gen.dataset import append_annotation, load_done_texts
+from atos.gen.minimax import MiniMaxClient
+from atos.gen.claude import ClaudeClient
+from atos.gen.pipeline import process_example
+from atos.gen.dataset import append_annotation, load_done_texts
 
 
 def _read(path: str) -> str:
@@ -900,7 +900,7 @@ def _read(path: str) -> str:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="chomsky.gen.cli",
+        prog="atos.gen.cli",
         description="Generate a synthetic speech-act span dataset (MiniMax bulk + Claude adjudicator).",
     )
     p.add_argument("--n", type=int, required=True, help="number of accepted examples to reach")
@@ -983,7 +983,7 @@ Expected: PASS (1 passed)
 This step is NOT automated. With both keys exported, generate 3 examples into a scratch file:
 ```bash
 MINIMAX_API_KEY=... ANTHROPIC_API_KEY=... \
-  .venv/bin/python -m chomsky.gen.cli --n 3 --out data/smoke.jsonl --cross-check-rate 1.0 --debug
+  .venv/bin/python -m atos.gen.cli --n 3 --out data/smoke.jsonl --cross-check-rate 1.0 --debug
 ```
 Expected: 3 lines in `data/smoke.jsonl`, each valid JSON with non-empty `spans`, and debug lines showing `[accepted]`/`[adjudicated]`. Inspect a couple by hand to confirm the spans are sane PT-BR speech acts. If MiniMax reasoning eats the token budget (empty content), see wiki `multi-provider-generation` and set a non-reasoning model. `data/` is gitignored — do not commit `smoke.jsonl`.
 
@@ -995,7 +995,7 @@ Expected: PASS (all Plan-1 + Plan-2 tests; ~55 passed)
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/chomsky/gen/cli.py config/rubric.md tests/test_cli_smoke.py
+git add src/atos/gen/cli.py config/rubric.md tests/test_cli_smoke.py
 git commit -m "feat(gen): generation CLI + provisional annotation rubric"
 ```
 
@@ -1013,7 +1013,7 @@ git commit -m "feat(gen): generation CLI + provisional annotation rubric"
 ```markdown
 ---
 type: concept
-tags: [synthetic-data, teacher-student, distillation, speech-acts, chomsky-project]
+tags: [synthetic-data, teacher-student, distillation, speech-acts, atos-project]
 sources: 0
 updated: 2026-06-04
 ---
@@ -1029,7 +1029,7 @@ training JSONL. The student (BERTimbau, Plan 3) distills the result.
 
 ## How It Works
 
-Per example (pure function `chomsky.gen.pipeline.process_example`): resolve quotes→offsets →
+Per example (pure function `atos.gen.pipeline.process_example`): resolve quotes→offsets →
 validate against the taxonomy → if invalid, Claude adjudicates or the example is rejected →
 on a sampled fraction, Claude cross-annotates and span-F1 agreement is measured → keep if
 ≥ threshold, else adjudicate or reject. API I/O is isolated in thin clients; orchestration is
@@ -1097,4 +1097,4 @@ git commit -m "docs(wiki): record generation pipeline build + concept"
 
 ## Done criteria
 
-`.venv/bin/pytest -q` green (Plan 1 + Plan 2, ~55 tests), `python -m chomsky.gen.cli --help` works, and the manual live smoke (Task 6 Step 6) produces sane PT-BR speech-act annotations. After Fase 0 freezes the taxonomy, only `config/taxonomy.yaml` + `config/rubric.md` change; code and tests are unaffected. Plan 3 (training) then consumes `data/dataset.jsonl`.
+`.venv/bin/pytest -q` green (Plan 1 + Plan 2, ~55 tests), `python -m atos.gen.cli --help` works, and the manual live smoke (Task 6 Step 6) produces sane PT-BR speech-act annotations. After Fase 0 freezes the taxonomy, only `config/taxonomy.yaml` + `config/rubric.md` change; code and tests are unaffected. Plan 3 (training) then consumes `data/dataset.jsonl`.

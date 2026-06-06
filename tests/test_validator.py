@@ -1,6 +1,6 @@
-from chomsky.validator import validate
-from chomsky.schema import Annotation, Span
-from chomsky.taxonomy import Taxonomy
+from atos.validator import validate
+from atos.schema import Annotation, Span
+from atos.taxonomy import Taxonomy
 
 TAX = Taxonomy(acts=["saudar", "pedir"], definitions={"saudar": "", "pedir": ""})
 

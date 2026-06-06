@@ -1,4 +1,4 @@
-from chomsky.collect.score import (
+from atos.collect.score import (
     streak_multiplier, points_for_vote, update_reliability,
     POINTS_SUGGESTION, POINTS_SUGGESTION_CONFIRMED,
 )

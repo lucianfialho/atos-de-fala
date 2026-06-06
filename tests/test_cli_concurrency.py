@@ -1,7 +1,7 @@
 import itertools
 import json
-from chomsky.gen import cli
-from chomsky.gen.dataset import load_done_annotations
+from atos.gen import cli
+from atos.gen.dataset import load_done_annotations
 
 
 def _fake_post_factory():
@@ -31,7 +31,7 @@ def json_dumps_example(i: int) -> str:
 
 def test_run_reaches_n_with_concurrency(tmp_path, monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "x")
-    monkeypatch.setattr("chomsky.gen.deepseek.requests.post", _fake_post_factory())
+    monkeypatch.setattr("atos.gen.deepseek.requests.post", _fake_post_factory())
 
     out = tmp_path / "ds.jsonl"
     args = cli.build_arg_parser().parse_args([
@@ -51,7 +51,7 @@ def test_run_reaches_n_with_concurrency(tmp_path, monkeypatch):
 
 def test_run_resumes_from_existing(tmp_path, monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "x")
-    monkeypatch.setattr("chomsky.gen.deepseek.requests.post", _fake_post_factory())
+    monkeypatch.setattr("atos.gen.deepseek.requests.post", _fake_post_factory())
     out = tmp_path / "ds.jsonl"
     # pre-seed 2 accepted
     out.write_text(

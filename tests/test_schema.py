@@ -1,4 +1,4 @@
-from chomsky.schema import Span, Annotation
+from atos.schema import Span, Annotation
 
 
 def test_span_is_frozen_and_holds_offsets():

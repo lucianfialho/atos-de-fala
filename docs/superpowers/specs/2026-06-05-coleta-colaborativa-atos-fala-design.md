@@ -2,7 +2,7 @@
 
 **Status:** aprovado no brainstorming (2026-06-05), aguardando review do spec antes do plano.
 
-**Codinome interno:** chomsky · **Produto público:** jogo de coleta (nome a definir).
+**Codinome interno:** atos · **Produto público:** jogo de coleta (nome a definir).
 
 ## Goal
 
@@ -36,18 +36,18 @@ gold humano (camada 2) com controle de qualidade.
 Dois subsistemas, acoplados por dois handoffs (lote pra anotar → votos coletados):
 
 ```
-[0] chomsky (Python, offline)  →  exporta LOTE de itens (frases + spans + atos da IA)
+[0] atos (Python, offline)  →  exporta LOTE de itens (frases + spans + atos da IA)
 [1] Web app (Next.js/Vercel)   →  entrada anônima + perfil
 [2] Web app                    →  loop do jogo: ✓/✗ por caixinha + sugestão opcional
         (envolto por progressão; v1 = 1 domínio, Fase 1 profundidade)
         ↓ votos + sugestões + perfil (Postgres/Neon)
-[3] chomsky (Python, offline)  →  ingere + agrega (agreement.py, peso por confiabilidade)
-[4] chomsky                    →  saídas: gold aberto · paráfrases · análise por perfil
+[3] atos (Python, offline)  →  ingere + agrega (agreement.py, peso por confiabilidade)
+[4] atos                    →  saídas: gold aberto · paráfrases · análise por perfil
         ↑ saídas melhoram o modelo → lotes melhores (loop fecha)
 ```
 
 **Princípio:** o web app **só coleta**. Toda lógica de ML, agregação e análise fica em
-Python, reusando o pacote `chomsky` existente (`taxonomy`, `schema`, `agreement`, o
+Python, reusando o pacote `atos` existente (`taxonomy`, `schema`, `agreement`, o
 adjudicador DeepSeek). O app não importa Python — recebe/entrega JSON via a base Postgres.
 
 ## Stack
@@ -56,7 +56,7 @@ adjudicador DeepSeek). O app não importa Python — recebe/entrega JSON via a b
 - **Banco:** **Postgres (Neon)** — serverless, free tier, integra com Vercel.
 - **Auth:** **nenhuma** — participação anônima; id (uuid v4) gerado no cliente e guardado
   em `localStorage`. (Sumiu a complexidade de provider de auth.)
-- **Pipeline offline:** pacote `chomsky` (Python 3.10, já existente), rodando na máquina
+- **Pipeline offline:** pacote `atos` (Python 3.10, já existente), rodando na máquina
   do dev / box tailscale. Lê/escreve no mesmo Postgres (read-replica ou dump).
 
 ## Componentes
@@ -75,17 +75,17 @@ adjudicador DeepSeek). O app não importa Python — recebe/entrega JSON via a b
   - `POST /api/suggestion` — grava uma sugestão de paráfrase.
   - `GET /api/me?participant=<uuid>` — pontos, streak, confiabilidade, itens feitos.
 
-### Pipeline Python (`chomsky`)
+### Pipeline Python (`atos`)
 
-- **`chomsky.collect.export_batch`** — seleciona itens (frases já anotadas pela IA) +
+- **`atos.collect.export_batch`** — seleciona itens (frases já anotadas pela IA) +
   injeta honeypots; grava na tabela `item`/`item_span` do Postgres.
-- **`chomsky.collect.ingest`** — lê votos/sugestões do Postgres; reduz a `Annotation`s.
-- **`chomsky.collect.aggregate`** — por span, voto majoritário **ponderado pela
+- **`atos.collect.ingest`** — lê votos/sugestões do Postgres; reduz a `Annotation`s.
+- **`atos.collect.aggregate`** — por span, voto majoritário **ponderado pela
   confiabilidade** do participante; emite gold quando a concordância ponderada ≥ limiar
   (reusa `agreement.py`). Marca itens de baixa concordância para a análise de percepção.
-- **`chomsky.collect.confirm_suggestions`** — manda cada sugestão pendente ao adjudicador
+- **`atos.collect.confirm_suggestions`** — manda cada sugestão pendente ao adjudicador
   DeepSeek: "esta paráfrase preserva o ato X?" → `confirmed`/`rejected`.
-- **`chomsky.collect.perception`** — cruza discordância × demografia; relatório por eixo.
+- **`atos.collect.perception`** — cruza discordância × demografia; relatório por eixo.
 
 ## Modelo de dados (Postgres)
 
@@ -152,7 +152,7 @@ os **dados** pra responder.)
 - Sugerir variação (bônus opcional).
 - Pontos imediatos + streak.
 - Honeypots + confiabilidade = peso do voto.
-- `chomsky.collect`: export de lote + ingest + aggregate + confirm_suggestions.
+- `atos.collect`: export de lote + ingest + aggregate + confirm_suggestions.
 - Fase 1 (profundidade): ~200 frases, 1 domínio (conversacional/sintético).
 - Sugestões confirmadas pelo adjudicador DeepSeek.
 
@@ -166,7 +166,7 @@ os **dados** pra responder.)
 
 ## Testing
 
-- **Python (`chomsky.collect`):** pytest (setup existente, gate de 150 linhas/arquivo).
+- **Python (`atos.collect`):** pytest (setup existente, gate de 150 linhas/arquivo).
   Unit: seleção de lote + injeção de honeypot; ingest (votos→Annotation); agregação
   ponderada por confiabilidade; pontuação de honeypot; confirm_suggestions (com
   adjudicador mockado). Reusa `agreement.py`/`schema` já testados.
@@ -177,7 +177,7 @@ os **dados** pra responder.)
 ## Decomposição p/ o plano
 
 São dois deliverables que se desenvolvem em paralelo após o schema do banco:
-1. **Pipeline `chomsky.collect`** (Python) — testável isolado contra um Postgres local.
+1. **Pipeline `atos.collect`** (Python) — testável isolado contra um Postgres local.
 2. **Web app** (Next.js) — testável isolado contra o mesmo schema com seed.
 
 O plano de implementação deve começar pelo **schema do Postgres** (contrato comum),
@@ -186,7 +186,7 @@ encadeados — decisão do writing-plans.
 
 ## Decisões em aberto (não bloqueiam o v1)
 
-- **Nome público do jogo** (codinome chomsky permanece interno).
+- **Nome público do jogo** (codinome atos permanece interno).
 - **Limiar de concordância** pra virar gold e **alvo de votos/item** — calibrar com os
   primeiros dados reais.
 - **Onde o Python lê o Postgres** (read-replica Neon vs dump periódico) — detalhe de infra.

@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [chomsky-project, linguistics, pragmatics, generative-grammar, framing]
+tags: [atos-project, linguistics, pragmatics, generative-grammar, framing]
 sources: 0
 updated: 2026-06-05
 ---
@@ -34,10 +34,10 @@ pragmatics (Searle) + the ISO 24617-2 standard. Chomsky is the name; pragmatics 
 ## Related Concepts
 
 - [Speech Act Theory](speech-act-theory.md)
-- [Noam Chomsky](../entities/noam-chomsky.md)
+- [Noam Chomsky](../entities/noam-atos.md)
 
 ## Sources
 
-- Norvig, P. (2011). "On Chomsky and the Two Cultures of Statistical Learning." https://norvig.com/chomsky.html
+- Norvig, P. (2011). "On Chomsky and the Two Cultures of Statistical Learning." https://norvig.com/atos.html
 - Chomsky, N. (1965). *Aspects of the Theory of Syntax*. MIT Press. [background]
 - Stanford Encyclopedia of Philosophy — Pragmatics: https://plato.stanford.edu/entries/pragmatics/

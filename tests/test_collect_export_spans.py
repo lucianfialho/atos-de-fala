@@ -1,4 +1,4 @@
-from chomsky.collect.export_spans import build_annotations
+from atos.collect.export_spans import build_annotations
 
 
 def _row(context, start, end, act, verdict="confirmed"):

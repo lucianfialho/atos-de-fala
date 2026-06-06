@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [speech-acts, bioes, labels, annotation, iso-24617-2, chomsky-project]
+tags: [speech-acts, bioes, labels, annotation, iso-24617-2, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -17,7 +17,7 @@ for open PT-BR text (dialogue-control dimensions out of scope for v1).
 
 ## How It Works
 
-`chomsky.taxonomy.bioes_labels(acts)` emits `O` first, then `B-/I-/E-/S-` per act in config
+`atos.taxonomy.bioes_labels(acts)` emits `O` first, then `B-/I-/E-/S-` per act in config
 order. `label_maps` gives contiguous `label2id`/`id2label`. Non-overlapping spans only (v1).
 
 ## The 13 acts (act — ISO function — Searle class)

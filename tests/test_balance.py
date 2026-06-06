@@ -1,5 +1,5 @@
-from chomsky.gen.balance import act_counts, under_target_acts, over_target_acts
-from chomsky.schema import Annotation, Span
+from atos.gen.balance import act_counts, under_target_acts, over_target_acts
+from atos.schema import Annotation, Span
 
 
 def test_act_counts_sums_spans_per_act():

@@ -1,9 +1,9 @@
-from chomsky.gen.dataset import (
+from atos.gen.dataset import (
     append_annotation,
     load_done_texts,
     load_done_annotations,
 )
-from chomsky.schema import Annotation, Span
+from atos.schema import Annotation, Span
 
 
 def test_load_done_texts_missing_file_is_empty(tmp_path):

@@ -1,5 +1,5 @@
 import pytest
-from chomsky.gen.deepseek import DeepSeekClient
+from atos.gen.deepseek import DeepSeekClient
 
 
 def test_extract_content_pulls_message_text():
@@ -30,7 +30,7 @@ def test_complete_posts_and_returns_content(monkeypatch):
         captured["json"] = json
         return FakeResp()
 
-    monkeypatch.setattr("chomsky.gen.deepseek.requests.post", fake_post)
+    monkeypatch.setattr("atos.gen.deepseek.requests.post", fake_post)
     client = DeepSeekClient(api_key="KEY", model="deepseek-chat")
     out = client.complete([{"role": "user", "content": "oi"}])
     assert out == "ola"

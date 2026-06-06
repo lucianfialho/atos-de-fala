@@ -60,7 +60,7 @@ Então só importamos os casos **atômicos** abaixo, não a regra de colapso.
 
 ## Apêndice B — macro-classes (eval coarse)
 
-Para avaliação coarse / sentence-level (`chomsky.train.eval_cli --coarse`), os 13 atos colapsam
+Para avaliação coarse / sentence-level (`atos.train.eval_cli --coarse`), os 13 atos colapsam
 nas classes ilocucionárias de Searle (campo `macro` em `config/taxonomy.yaml`):
 `assertivo` (informar, concordar, discordar) · `pergunta` (perguntar) · `diretivo` (pedir, sugerir) ·
 `comissivo` (oferecer, prometer) · `expressivo` (saudar, agradecer, desculpar, despedir, expressar_emocao).

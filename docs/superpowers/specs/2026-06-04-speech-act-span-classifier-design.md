@@ -1,6 +1,6 @@
 # Design — Classificador de Atos de Fala por Span (PT-BR)
 
-**Projeto:** chomsky
+**Projeto:** atos
 **Data:** 2026-06-04
 **Status:** Aprovado no brainstorming; pendente review do spec antes do plano de implementação.
 

@@ -9,7 +9,7 @@ id2label/label2id (the 53 BIOES labels) so predictions come back as act names, n
 import json
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 from peft import PeftModel
-from chomsky.taxonomy import load_taxonomy, bioes_labels, label_maps
+from atos.taxonomy import load_taxonomy, bioes_labels, label_maps
 
 ADAPTER = "runs/sa-lora"
 OUT = "runs/sa-merged"

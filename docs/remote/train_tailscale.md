@@ -1,6 +1,6 @@
 # Remote Runbook — Train on your own NVIDIA box over Tailscale
 
-This is the **primary** training path for chomsky (replaces the Colab runbook). Everything —
+This is the **primary** training path for atos (replaces the Colab runbook). Everything —
 synthetic generation, training, and evaluation — runs on a remote **NVIDIA CUDA Linux** machine
 reached over Tailscale SSH. Only the code is pushed from the laptop; the dataset is generated on
 the box.
@@ -10,7 +10,7 @@ SUPER (8 GB VRAM, Turing)**, Python 3.10.12, ~295 GB free.
 
 ```bash
 REMOTE=lucian@lucian-desktop.tailbb1a78.ts.net
-REMOTE_DIR=~/chomsky
+REMOTE_DIR=~/atos
 ```
 
 **Connection:** the plain `ssh` client hits "Host key verification failed" for this host, so use
@@ -36,14 +36,14 @@ generated data (the dataset is regenerated on the box). `raw/` (incl. the Portti
 rsync -avz --delete -e 'tailscale ssh' \
   --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' \
   --exclude '*.egg-info/' --exclude '.pytest_cache/' --exclude '/data/' --exclude '/runs/' --exclude '/gold/' --exclude '*.log' \
-  ./ "$REMOTE:chomsky/"
+  ./ "$REMOTE:atos/"
 ```
 
 ## 2. One-time environment setup (on the box)
 
 ```bash
 ssh "$REMOTE"
-cd ~/chomsky
+cd ~/atos
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -U pip
@@ -65,7 +65,7 @@ than a cross-family check; the reasoner + the hard validator recover most of it.
 
 ```bash
 export DEEPSEEK_API_KEY=...        # bulk + adjudicator (DeepSeek-only)
-python -m chomsky.gen.cli \
+python -m atos.gen.cli \
   --provider deepseek --adjudicator deepseek --n 10000 \
   --out data/dataset.jsonl \
   --cross-check-rate 0.15 --concurrency 8 --debug
@@ -75,15 +75,15 @@ DeepSeek), so this is ~8× faster wall-clock than sequential (10k drops from hou
 if DeepSeek's rate limit allows; transient rate-limit errors are caught per-example and don't kill
 the run. Per-act balancing is on by default (steers toward ~n/13 of each act). Resume-safe: re-run
 the same command to continue. Run under `tmux`/`nohup` so it survives SSH drops —
-`nohup python -m chomsky.gen.cli ... --concurrency 8 > gen.log 2>&1 < /dev/null &` then `tail -f gen.log`.
+`nohup python -m atos.gen.cli ... --concurrency 8 > gen.log 2>&1 < /dev/null &` then `tail -f gen.log`.
 
 ## 4. Anti-NaN sanity check before training (wiki: lora-fine-tuning-pitfalls #5)
 
 ```bash
 python - <<'PY'
 import torch
-from chomsky.train.model import build_model, apply_lora
-from chomsky.taxonomy import load_taxonomy
+from atos.train.model import build_model, apply_lora
+from atos.taxonomy import load_taxonomy
 tax = load_taxonomy("config/taxonomy.yaml")
 m, tok = build_model("neuralmind/bert-base-portuguese-cased", tax)
 m = m.cuda()                      # .cuda() BEFORE apply_lora (pitfall #1)
@@ -99,7 +99,7 @@ PY
 ## 5. Train (uses CUDA automatically)
 
 ```bash
-python -m chomsky.train.train \
+python -m atos.train.train \
   --train data/dataset.jsonl --out runs/sa-lora \
   --epochs 5 --batch-size 8 --grad-accum 4 --lr 2e-4 --fp16
 ```
@@ -110,8 +110,8 @@ you hit CUDA OOM: lower `--batch-size` to 4, or `--max-length` to 128. Watch dis
 ## 6. Evaluate on the real Porttinari holdout (span-F1; uses GPU if present)
 
 ```bash
-python -m chomsky.train.porttinari --out data/porttinari-holdout.jsonl
-python -m chomsky.train.eval_cli --model runs/sa-lora --holdout data/porttinari-holdout.jsonl
+python -m atos.train.porttinari --out data/porttinari-holdout.jsonl
+python -m atos.train.eval_cli --model runs/sa-lora --holdout data/porttinari-holdout.jsonl
 ```
 `eval_cli` now moves the model to CUDA automatically. **Caveat:** Porttinari gold is sentence-level
 while the model predicts finer spans, so exact span-F1 understates quality — read it as a
@@ -133,18 +133,18 @@ A small hand-annotated set lets you check the teacher's real accuracy and A/B te
 
 ```bash
 # 1) blind skeleton: sample ~150 generated TEXTS (labels stripped) for you to re-annotate
-python -m chomsky.gold template --from data/dataset.jsonl --n 150 --out gold/to_annotate.jsonl
+python -m atos.gold template --from data/dataset.jsonl --n 150 --out gold/to_annotate.jsonl
 
 # 2) annotate by hand: edit gold/to_annotate.jsonl, fill each "spans" with
 #    {"quote": "<exact substring of text>", "act": "<one of the 13>"}  — follow config/rubric.md
 
 # 3) compile + validate (resolves quotes->offsets, flags bad quotes/illegal acts/overlap)
-python -m chomsky.gold compile --in gold/to_annotate.jsonl --out gold/gold.jsonl
+python -m atos.gold compile --in gold/to_annotate.jsonl --out gold/gold.jsonl
 
 # 4a) use as a trustworthy eval holdout
-python -m chomsky.train.eval_cli --model runs/sa-lora --holdout gold/gold.jsonl
+python -m atos.train.eval_cli --model runs/sa-lora --holdout gold/gold.jsonl
 # 4b) measure the TEACHER directly (its labels for those exact texts, from the dataset)
-python -m chomsky.gold score --gold gold/gold.jsonl --teacher data/dataset.jsonl
+python -m atos.gold score --gold gold/gold.jsonl --teacher data/dataset.jsonl
 ```
 Step 4b is apples-to-apples span-F1 (same texts), so it tells you the teacher's ceiling. To A/B
 teachers, generate a batch with each (e.g. `--adjudicator kimi` vs `deepseek`), annotate one gold,
@@ -157,7 +157,7 @@ from the laptop browser over Tailscale — select a fragment, click an act (or k
 
 ```bash
 # on the box:
-python -m chomsky.annotate --file gold/to_annotate.jsonl --host 0.0.0.0 --port 8765
+python -m atos.annotate --file gold/to_annotate.jsonl --host 0.0.0.0 --port 8765
 # on the laptop: open http://lucian-desktop.tailbb1a78.ts.net:8765
 ```
 It writes the same quote-JSONL, so afterwards run `gold compile` then `gold score` as above. No auth —

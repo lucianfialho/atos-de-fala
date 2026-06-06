@@ -1,5 +1,5 @@
-from chomsky.collect.select import build_items
-from chomsky.schema import Annotation, Span
+from atos.collect.select import build_items
+from atos.schema import Annotation, Span
 
 
 def test_build_items_maps_annotation_to_item_with_spans():

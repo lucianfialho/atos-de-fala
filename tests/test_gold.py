@@ -1,6 +1,6 @@
-from chomsky.gold import make_template, sample_texts, compile_gold, score_against
-from chomsky.schema import Annotation, Span
-from chomsky.taxonomy import Taxonomy
+from atos.gold import make_template, sample_texts, compile_gold, score_against
+from atos.schema import Annotation, Span
+from atos.taxonomy import Taxonomy
 
 TAX = Taxonomy(
     acts=["informar", "pedir", "saudar"],

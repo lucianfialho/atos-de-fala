@@ -1,4 +1,4 @@
-"""Hugging Face Space — chomsky speech-act classifier (PT-BR).
+"""Hugging Face Space — atos speech-act classifier (PT-BR).
 
 Self-contained: loads BERTimbau + the bundled LoRA adapter, tags speech-act spans,
 shows them highlighted. Gradio is imported only in __main__ so `predict` is importable

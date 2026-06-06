@@ -4,7 +4,7 @@
 
 **Goal:** Build the pure-logic foundation for span-level speech-act annotation: a taxonomy/BIOES label system, an annotation data model, a quote-resolver, a validator, a BIOES tagger, a double-annotation agreement gate, and a span-level F1 evaluator — all unit-tested, with zero dependency on external APIs, GPU, or network.
 
-**Architecture:** A small Python package `chomsky` under `src/`. Every speech act and label is derived from a single `config/taxonomy.yaml` so the taxonomy can be swapped (once frozen from the papers) without touching code. The annotation unit is a list of non-overlapping character-offset spans, each carrying a speech-act label. All core functions are pure (no I/O) and take primitive inputs (text, offsets, span lists) so tests are hermetic.
+**Architecture:** A small Python package `atos` under `src/`. Every speech act and label is derived from a single `config/taxonomy.yaml` so the taxonomy can be swapped (once frozen from the papers) without touching code. The annotation unit is a list of non-overlapping character-offset spans, each carrying a speech-act label. All core functions are pure (no I/O) and take primitive inputs (text, offsets, span lists) so tests are hermetic.
 
 **Tech Stack:** Python ≥3.10, `pyyaml` (config), `pytest` (tests), setuptools (editable install). No torch/transformers in this plan — those land in Plan 3 (Training).
 
@@ -17,11 +17,11 @@ This plan is **Plan 1 of 3** (see `docs/superpowers/specs/2026-06-04-speech-act-
 ## File Structure
 
 ```
-chomsky/
+atos/
 ├── pyproject.toml                 # package + deps + pytest config
 ├── config/
 │   └── taxonomy.yaml              # provisional 12-act taxonomy (swap when frozen)
-├── src/chomsky/
+├── src/atos/
 │   ├── __init__.py
 │   ├── schema.py                  # Span, Annotation dataclasses + JSON (de)serialize
 │   ├── taxonomy.py                # load taxonomy → acts, BIOES labels, label↔id maps
@@ -58,14 +58,14 @@ chomsky/
 
 **Files:**
 - Create: `pyproject.toml`
-- Create: `src/chomsky/__init__.py`
+- Create: `src/atos/__init__.py`
 - Modify: `.gitignore` (append)
 
 - [ ] **Step 1: Create `pyproject.toml`**
 
 ```toml
 [project]
-name = "chomsky"
+name = "atos"
 version = "0.1.0"
 description = "Span-level speech-act classification for PT-BR"
 requires-python = ">=3.10"
@@ -88,8 +88,8 @@ testpaths = ["tests"]
 - [ ] **Step 2: Create the package marker**
 
 ```python
-# src/chomsky/__init__.py
-"""chomsky — span-level speech-act classification for PT-BR."""
+# src/atos/__init__.py
+"""atos — span-level speech-act classification for PT-BR."""
 ```
 
 - [ ] **Step 3: Append to `.gitignore`**
@@ -109,7 +109,7 @@ data/
 
 Run:
 ```bash
-cd /Users/lucianfialho/Code/antiachismosocialclub/chomsky
+cd /Users/lucianfialho/Code/antiachismosocialclub/atos
 python3 -m venv .venv
 .venv/bin/pip install -q -e ".[dev]"
 .venv/bin/pytest -q
@@ -119,8 +119,8 @@ Expected: pytest runs, collects 0 items, exits 0 (`no tests ran`).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add pyproject.toml src/chomsky/__init__.py .gitignore
-git commit -m "chore: scaffold chomsky package + pytest"
+git add pyproject.toml src/atos/__init__.py .gitignore
+git commit -m "chore: scaffold atos package + pytest"
 ```
 
 ---
@@ -128,14 +128,14 @@ git commit -m "chore: scaffold chomsky package + pytest"
 ## Task 1: Annotation schema (`schema.py`)
 
 **Files:**
-- Create: `src/chomsky/schema.py`
+- Create: `src/atos/schema.py`
 - Test: `tests/test_schema.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_schema.py
-from chomsky.schema import Span, Annotation
+from atos.schema import Span, Annotation
 
 
 def test_span_is_frozen_and_holds_offsets():
@@ -162,12 +162,12 @@ def test_from_json_parses_expected_shape():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_schema.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.schema'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.schema'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/schema.py
+# src/atos/schema.py
 from dataclasses import dataclass
 from typing import List
 import json
@@ -214,7 +214,7 @@ Expected: PASS (3 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/schema.py tests/test_schema.py
+git add src/atos/schema.py tests/test_schema.py
 git commit -m "feat: annotation schema (Span, Annotation, JSON roundtrip)"
 ```
 
@@ -223,7 +223,7 @@ git commit -m "feat: annotation schema (Span, Annotation, JSON roundtrip)"
 ## Task 2: Taxonomy + BIOES labels (`taxonomy.py`)
 
 **Files:**
-- Create: `src/chomsky/taxonomy.py`
+- Create: `src/atos/taxonomy.py`
 - Create: `config/taxonomy.yaml`
 - Test: `tests/test_taxonomy.py`
 
@@ -231,7 +231,7 @@ git commit -m "feat: annotation schema (Span, Annotation, JSON roundtrip)"
 
 ```python
 # tests/test_taxonomy.py
-from chomsky.taxonomy import load_taxonomy, bioes_labels, label_maps
+from atos.taxonomy import load_taxonomy, bioes_labels, label_maps
 
 
 def test_load_taxonomy_reads_acts_and_definitions(tmp_path):
@@ -270,12 +270,12 @@ def test_label_maps_are_inverse_and_contiguous():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_taxonomy.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.taxonomy'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.taxonomy'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/taxonomy.py
+# src/atos/taxonomy.py
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 import yaml
@@ -364,7 +364,7 @@ Expected: PASS (4 passed)
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/chomsky/taxonomy.py tests/test_taxonomy.py config/taxonomy.yaml
+git add src/atos/taxonomy.py tests/test_taxonomy.py config/taxonomy.yaml
 git commit -m "feat: taxonomy loader + BIOES label scheme + provisional 12-act config"
 ```
 
@@ -375,15 +375,15 @@ git commit -m "feat: taxonomy loader + BIOES label scheme + provisional 12-act c
 The teacher LLMs return spans as **quoted substrings** + an act, not char offsets. This module converts them to offset-based `Annotation`, enforcing the verbatim check (quote must appear in the text) and left-to-right ordering (each quote is located at or after the previous span's end, which disambiguates repeated substrings and guarantees ordered, non-overlapping spans when inputs are well-formed).
 
 **Files:**
-- Create: `src/chomsky/resolve.py`
+- Create: `src/atos/resolve.py`
 - Test: `tests/test_resolve.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_resolve.py
-from chomsky.resolve import resolve_quoted_spans
-from chomsky.schema import Span
+from atos.resolve import resolve_quoted_spans
+from atos.schema import Span
 
 
 def test_resolves_quotes_to_offsets_in_order():
@@ -421,14 +421,14 @@ def test_missing_quote_reports_error():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_resolve.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.resolve'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.resolve'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/resolve.py
+# src/atos/resolve.py
 from typing import Dict, List, Tuple
-from chomsky.schema import Annotation, Span
+from atos.schema import Annotation, Span
 
 
 def resolve_quoted_spans(
@@ -458,7 +458,7 @@ Expected: PASS (3 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/resolve.py tests/test_resolve.py
+git add src/atos/resolve.py tests/test_resolve.py
 git commit -m "feat: resolve quoted spans to char offsets (verbatim + ordered)"
 ```
 
@@ -467,16 +467,16 @@ git commit -m "feat: resolve quoted spans to char offsets (verbatim + ordered)"
 ## Task 4: Annotation validator (`validator.py`)
 
 **Files:**
-- Create: `src/chomsky/validator.py`
+- Create: `src/atos/validator.py`
 - Test: `tests/test_validator.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_validator.py
-from chomsky.validator import validate
-from chomsky.schema import Annotation, Span
-from chomsky.taxonomy import Taxonomy
+from atos.validator import validate
+from atos.schema import Annotation, Span
+from atos.taxonomy import Taxonomy
 
 TAX = Taxonomy(acts=["saudar", "pedir"], definitions={"saudar": "", "pedir": ""})
 
@@ -513,15 +513,15 @@ def test_overlapping_spans_are_flagged():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_validator.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.validator'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.validator'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/validator.py
+# src/atos/validator.py
 from typing import List
-from chomsky.schema import Annotation
-from chomsky.taxonomy import Taxonomy
+from atos.schema import Annotation
+from atos.taxonomy import Taxonomy
 
 
 def validate(ann: Annotation, taxonomy: Taxonomy) -> List[str]:
@@ -555,7 +555,7 @@ Expected: PASS (5 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/validator.py tests/test_validator.py
+git add src/atos/validator.py tests/test_validator.py
 git commit -m "feat: annotation validator (bounds, legal act, non-overlap)"
 ```
 
@@ -566,15 +566,15 @@ git commit -m "feat: annotation validator (bounds, legal act, non-overlap)"
 Pure function: given char-offset spans and the per-token char offsets (from a tokenizer's `return_offsets_mapping=True`), emit one BIOES tag per token. A token belongs to a span when its char range is fully contained in the span. Special tokens carry offset `(0, 0)` and map to `O`.
 
 **Files:**
-- Create: `src/chomsky/bioes.py`
+- Create: `src/atos/bioes.py`
 - Test: `tests/test_bioes.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_bioes.py
-from chomsky.bioes import char_spans_to_bioes
-from chomsky.schema import Span
+from atos.bioes import char_spans_to_bioes
+from atos.schema import Span
 
 
 def test_single_token_span_gets_S():
@@ -607,14 +607,14 @@ def test_special_tokens_and_gaps_are_O():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_bioes.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.bioes'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.bioes'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/bioes.py
+# src/atos/bioes.py
 from typing import List, Tuple
-from chomsky.schema import Span
+from atos.schema import Span
 
 
 def _token_in_span(tok: Tuple[int, int], span: Span) -> bool:
@@ -657,7 +657,7 @@ Expected: PASS (4 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/bioes.py tests/test_bioes.py
+git add src/atos/bioes.py tests/test_bioes.py
 git commit -m "feat: BIOES tagging from char spans + token offsets"
 ```
 
@@ -668,15 +668,15 @@ git commit -m "feat: BIOES tagging from char spans + token offsets"
 Quality gate for the teacher mixture: compare two annotations of the same text (e.g. MiniMax vs Claude) by exact span+act match, return an F1-style agreement score, and decide `keep` (high agreement) vs `adjudicate` (route to Claude).
 
 **Files:**
-- Create: `src/chomsky/agreement.py`
+- Create: `src/atos/agreement.py`
 - Test: `tests/test_agreement.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_agreement.py
-from chomsky.agreement import span_agreement, gate
-from chomsky.schema import Annotation, Span
+from atos.agreement import span_agreement, gate
+from atos.schema import Annotation, Span
 
 
 def _ann(spans):
@@ -714,14 +714,14 @@ def test_gate_keeps_above_threshold_and_adjudicates_below():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_agreement.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.agreement'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.agreement'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/agreement.py
+# src/atos/agreement.py
 from typing import Set, Tuple
-from chomsky.schema import Annotation
+from atos.schema import Annotation
 
 
 def _span_set(ann: Annotation) -> Set[Tuple[int, int, str]]:
@@ -754,7 +754,7 @@ Expected: PASS (4 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/agreement.py tests/test_agreement.py
+git add src/atos/agreement.py tests/test_agreement.py
 git commit -m "feat: double-annotation agreement gate (span F1 + keep/adjudicate)"
 ```
 
@@ -765,15 +765,15 @@ git commit -m "feat: double-annotation agreement gate (span F1 + keep/adjudicate
 The metric the spec requires (Phase 4): **span-level** precision/recall/F1 (exact start+end+act match) over a dataset of gold vs predicted annotations, plus a per-act F1 breakdown to spot confusable acts.
 
 **Files:**
-- Create: `src/chomsky/eval.py`
+- Create: `src/atos/eval.py`
 - Test: `tests/test_eval.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_eval.py
-from chomsky.eval import span_prf1, per_act_f1
-from chomsky.schema import Annotation, Span
+from atos.eval import span_prf1, per_act_f1
+from atos.schema import Annotation, Span
 
 
 def test_perfect_prediction_scores_one():
@@ -806,14 +806,14 @@ def test_empty_dataset_scores_zero():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_eval.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.eval'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.eval'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/eval.py
+# src/atos/eval.py
 from typing import Dict, List, Set, Tuple
-from chomsky.schema import Annotation
+from atos.schema import Annotation
 
 Key = Tuple[int, int, int, str]  # (doc_index, start, end, act)
 
@@ -864,7 +864,7 @@ Expected: PASS (all tests across the 7 modules; ~27 passed)
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/chomsky/eval.py tests/test_eval.py
+git add src/atos/eval.py tests/test_eval.py
 git commit -m "feat: span-level PRF1 evaluator + per-act breakdown"
 ```
 
@@ -884,7 +884,7 @@ Per `SCHEMA.md`, record this build in the wiki so the knowledge compounds.
 ```markdown
 ---
 type: concept
-tags: [speech-acts, bioes, labels, annotation, chomsky-project]
+tags: [speech-acts, bioes, labels, annotation, atos-project]
 sources: 0
 updated: 2026-06-04
 ---
@@ -899,7 +899,7 @@ Provisional taxonomy (12 acts → 49 labels), to be frozen in Phase 1 from the p
 
 ## How It Works
 
-`chomsky.taxonomy.bioes_labels(acts)` emits `O` first, then `B-/I-/E-/S-` per act in config
+`atos.taxonomy.bioes_labels(acts)` emits `O` first, then `B-/I-/E-/S-` per act in config
 order. `label_maps` gives contiguous `label2id`/`id2label`. Non-overlapping spans only (v1).
 
 ## Provisional acts

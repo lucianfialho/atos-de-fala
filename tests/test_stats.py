@@ -1,5 +1,5 @@
-from chomsky.stats import compute_stats
-from chomsky.schema import Annotation, Span
+from atos.stats import compute_stats
+from atos.schema import Annotation, Span
 
 
 def test_compute_stats_basic_counts():

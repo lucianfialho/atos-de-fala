@@ -1,6 +1,6 @@
 ---
 type: entity
-tags: [bertimbau, bert, portuguese, token-classification, model, chomsky-project]
+tags: [bertimbau, bert, portuguese, token-classification, model, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -10,7 +10,7 @@ updated: 2026-06-05
 ## What It Is
 
 A family of monolingual BERT models pre-trained on Brazilian Portuguese (brWaC corpus) by
-neuralmind (Unicamp). The canonical starting point for PT-BR NLP fine-tuning. The chomsky student
+neuralmind (Unicamp). The canonical starting point for PT-BR NLP fine-tuning. The atos student
 model fine-tunes `neuralmind/bert-base-portuguese-cased` as a BIOES speech-act token classifier.
 
 ## Significance

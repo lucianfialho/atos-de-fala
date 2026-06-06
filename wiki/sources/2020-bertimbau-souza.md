@@ -1,6 +1,6 @@
 ---
 type: source
-tags: [bertimbau, bert, portuguese, pretraining, ner, chomsky-project]
+tags: [bertimbau, bert, portuguese, pretraining, ner, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -27,7 +27,7 @@ Portuguese NER (HAREM/MiniHAREM).
 - MiniHAREM NER F1 (5-class): Large 83.7, Base 83.1 (mBERT 79.2).
 - MIT license; `neuralmind/bert-base-portuguese-cased` / `-large-`.
 
-## Relevance to chomsky
+## Relevance to atos
 
 - The student backbone for Plan 3 (BIOES speech-act token classifier).
 - Confirms strong PT-BR token-classification capability to fine-tune from.

@@ -6,7 +6,7 @@
 
 **Architecture:** The bug-prone pure logic — JSONL loading, char-span→label-id alignment, and **BIOES→spans decoding** (the inverse of the tagger, used at inference) — is unit-tested offline with no ML deps. The `transformers`/`peft`/GPU pieces (model builder, training loop, eval CLI) carry complete runnable code plus a CPU smoke test on a tiny model (`prajjwal1/bert-tiny`, ~17MB) so wiring is verified without the 400MB BERTimbau download or a GPU. Reuses Plan-1's `char_spans_to_bioes`, `taxonomy`, `schema`, and `eval`.
 
-**Tech Stack:** Python ≥3.10, `torch`, `transformers`, `peft`, the existing `chomsky` package, `pytest`. Real training targets Colab A100; smoke runs on CPU.
+**Tech Stack:** Python ≥3.10, `torch`, `transformers`, `peft`, the existing `atos` package, `pytest`. Real training targets Colab A100; smoke runs on CPU.
 
 ---
 
@@ -22,9 +22,9 @@ This is **Plan 3 of 3** (see `docs/superpowers/specs/2026-06-04-speech-act-span-
 ## File Structure
 
 ```
-chomsky/
+atos/
 ├── pyproject.toml              # MODIFY: add optional 'ml' deps
-├── src/chomsky/train/
+├── src/atos/train/
 │   ├── __init__.py
 │   ├── data.py                 # load_jsonl -> List[Annotation]
 │   ├── features.py             # align_labels (pure) + encode_example (tokenizer wrapper)
@@ -57,7 +57,7 @@ chomsky/
 
 **Files:**
 - Modify: `pyproject.toml`
-- Create: `src/chomsky/train/__init__.py`
+- Create: `src/atos/train/__init__.py`
 
 - [ ] **Step 1: Add the `ml` optional dependency group to `pyproject.toml`**
 
@@ -73,15 +73,15 @@ ml = ["torch>=2.2", "transformers>=4.40", "peft>=0.11"]
 - [ ] **Step 2: Create the subpackage marker**
 
 ```python
-# src/chomsky/train/__init__.py
-"""chomsky.train — BERTimbau LoRA token-classification training + span eval."""
+# src/atos/train/__init__.py
+"""atos.train — BERTimbau LoRA token-classification training + span eval."""
 ```
 
 - [ ] **Step 3: Install ml extras (heavy; downloads torch)**
 
 Run:
 ```bash
-cd /Users/lucianfialho/Code/antiachismosocialclub/chomsky
+cd /Users/lucianfialho/Code/antiachismosocialclub/atos
 .venv/bin/pip install -q -e ".[dev,gen,ml]"
 .venv/bin/python -c "import torch, transformers, peft; print(torch.__version__, transformers.__version__, peft.__version__)"
 ```
@@ -90,8 +90,8 @@ Expected: prints three versions. (Large download; may take minutes.)
 - [ ] **Step 4: Commit**
 
 ```bash
-git add pyproject.toml src/chomsky/train/__init__.py
-git commit -m "chore: scaffold chomsky.train subpackage + ml deps"
+git add pyproject.toml src/atos/train/__init__.py
+git commit -m "chore: scaffold atos.train subpackage + ml deps"
 ```
 
 ---
@@ -99,15 +99,15 @@ git commit -m "chore: scaffold chomsky.train subpackage + ml deps"
 ## Task 1: JSONL dataset loader (`data.py`)
 
 **Files:**
-- Create: `src/chomsky/train/data.py`
+- Create: `src/atos/train/data.py`
 - Test: `tests/test_train_data.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_train_data.py
-from chomsky.train.data import load_jsonl
-from chomsky.schema import Annotation, Span
+from atos.train.data import load_jsonl
+from atos.schema import Annotation, Span
 
 
 def test_loads_annotations_skipping_blank_lines(tmp_path):
@@ -134,14 +134,14 @@ def test_empty_file_returns_empty_list(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_train_data.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.train.data'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.train.data'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/train/data.py
+# src/atos/train/data.py
 from typing import List
-from chomsky.schema import Annotation
+from atos.schema import Annotation
 
 
 def load_jsonl(path: str) -> List[Annotation]:
@@ -164,7 +164,7 @@ Expected: PASS (2 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/train/data.py tests/test_train_data.py
+git add src/atos/train/data.py tests/test_train_data.py
 git commit -m "feat(train): JSONL annotation loader"
 ```
 
@@ -175,14 +175,14 @@ git commit -m "feat(train): JSONL annotation loader"
 Converts BIOES tags + a special-tokens mask into label ids, with `-100` (ignore index) for special tokens. This is the pure core of feature building.
 
 **Files:**
-- Create: `src/chomsky/train/features.py`
+- Create: `src/atos/train/features.py`
 - Test: `tests/test_features.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_features.py
-from chomsky.train.features import align_labels
+from atos.train.features import align_labels
 
 
 def test_special_tokens_become_ignore_index():
@@ -202,12 +202,12 @@ def test_all_real_tokens_map_to_ids():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_features.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.train.features'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.train.features'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/train/features.py
+# src/atos/train/features.py
 from typing import Dict, List
 
 IGNORE_INDEX = -100
@@ -226,11 +226,11 @@ def align_labels(
 def encode_example(text, spans, tokenizer, label2id, max_length: int = 256) -> Dict:
     """Tokenize text and produce input_ids/attention_mask/labels for token-cls training.
 
-    Requires a *fast* tokenizer (offset mapping). Uses chomsky.bioes.char_spans_to_bioes
+    Requires a *fast* tokenizer (offset mapping). Uses atos.bioes.char_spans_to_bioes
     to derive per-token BIOES tags, then align_labels to map them to ids with -100 on
     special tokens.
     """
-    from chomsky.bioes import char_spans_to_bioes
+    from atos.bioes import char_spans_to_bioes
 
     enc = tokenizer(
         text,
@@ -256,7 +256,7 @@ Expected: PASS (2 passed). (`encode_example` is exercised by the smoke test in T
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/train/features.py tests/test_features.py
+git add src/atos/train/features.py tests/test_features.py
 git commit -m "feat(train): label alignment + encode_example"
 ```
 
@@ -267,15 +267,15 @@ git commit -m "feat(train): label alignment + encode_example"
 The inverse of the tagger, used at inference to turn predicted per-token tags back into char-offset spans. Lenient with malformed sequences. Heavily tested — this is where decoding bugs hide.
 
 **Files:**
-- Create: `src/chomsky/train/decode.py`
+- Create: `src/atos/train/decode.py`
 - Test: `tests/test_decode.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_decode.py
-from chomsky.train.decode import bioes_tags_to_spans
-from chomsky.schema import Span
+from atos.train.decode import bioes_tags_to_spans
+from atos.schema import Span
 
 
 def test_single_S_tag():
@@ -335,14 +335,14 @@ def test_act_switch_closes_previous_span():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_decode.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.train.decode'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.train.decode'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/train/decode.py
+# src/atos/train/decode.py
 from typing import List, Optional, Tuple
-from chomsky.schema import Span
+from atos.schema import Span
 
 
 def _split(tag: str) -> Tuple[str, Optional[str]]:
@@ -411,7 +411,7 @@ Expected: PASS (8 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/train/decode.py tests/test_decode.py
+git add src/atos/train/decode.py tests/test_decode.py
 git commit -m "feat(train): BIOES->spans decoder (lenient, inverse of tagger)"
 ```
 
@@ -422,7 +422,7 @@ git commit -m "feat(train): BIOES->spans decoder (lenient, inverse of tagger)"
 BERTimbau token-classification head + LoRA. Bakes in the wiki `lora-fine-tuning-pitfalls`: move `.cuda()` BEFORE `get_peft_model` (caller's job in train.py), and — critically — the BERT classifier head is named `classifier` (NOT `score` as in Privacy Filter BR), and BERT attention projections are `query`/`value` (NOT `q_proj`/`v_proj`).
 
 **Files:**
-- Create: `src/chomsky/train/model.py`
+- Create: `src/atos/train/model.py`
 - Test: `tests/test_model_smoke.py`
 
 - [ ] **Step 1: Write the failing test (smoke; requires network for tiny model)**
@@ -435,8 +435,8 @@ pytest.importorskip("torch")
 pytest.importorskip("transformers")
 pytest.importorskip("peft")
 
-from chomsky.train.model import build_model, apply_lora
-from chomsky.taxonomy import Taxonomy
+from atos.train.model import build_model, apply_lora
+from atos.taxonomy import Taxonomy
 
 TINY = "prajjwal1/bert-tiny"
 TAX = Taxonomy(acts=["saudar", "pedir"], definitions={"saudar": "", "pedir": ""})
@@ -461,16 +461,16 @@ def test_apply_lora_makes_few_params_trainable():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_model_smoke.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.train.model'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.train.model'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/train/model.py
+# src/atos/train/model.py
 from typing import Tuple
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 from peft import LoraConfig, TaskType, get_peft_model
-from chomsky.taxonomy import Taxonomy, bioes_labels, label_maps
+from atos.taxonomy import Taxonomy, bioes_labels, label_maps
 
 
 def build_model(model_name: str, taxonomy: Taxonomy):
@@ -522,7 +522,7 @@ Expected: PASS (2 passed). First run downloads `prajjwal1/bert-tiny` (~17MB).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/train/model.py tests/test_model_smoke.py
+git add src/atos/train/model.py tests/test_model_smoke.py
 git commit -m "feat(train): BERTimbau token-cls model builder + LoRA (BERT names)"
 ```
 
@@ -533,7 +533,7 @@ git commit -m "feat(train): BERTimbau token-cls model builder + LoRA (BERT names
 Wires data → features → model → HF Trainer. Uses the current Transformers API names (wiki API-churn lesson: `eval_strategy`, `processing_class`). Smoke runs 1 step on CPU with the tiny model.
 
 **Files:**
-- Create: `src/chomsky/train/train.py`
+- Create: `src/atos/train/train.py`
 - Test: `tests/test_train_smoke.py`
 
 - [ ] **Step 1: Write the failing test (smoke; requires tiny-model download)**
@@ -547,7 +547,7 @@ pytest.importorskip("torch")
 pytest.importorskip("transformers")
 pytest.importorskip("peft")
 
-from chomsky.train.train import main
+from atos.train.train import main
 
 
 def _write_ds(path):
@@ -584,12 +584,12 @@ def test_training_smoke_produces_an_adapter(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_train_smoke.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.train.train'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.train.train'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/train/train.py
+# src/atos/train/train.py
 import argparse
 import torch
 from transformers import (
@@ -597,15 +597,15 @@ from transformers import (
     TrainingArguments,
     DataCollatorForTokenClassification,
 )
-from chomsky.taxonomy import load_taxonomy, bioes_labels, label_maps
-from chomsky.train.data import load_jsonl
-from chomsky.train.features import encode_example
-from chomsky.train.model import build_model, apply_lora
+from atos.taxonomy import load_taxonomy, bioes_labels, label_maps
+from atos.train.data import load_jsonl
+from atos.train.features import encode_example
+from atos.train.model import build_model, apply_lora
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="chomsky.train.train",
+        prog="atos.train.train",
         description="Fine-tune BERTimbau (LoRA) as a BIOES speech-act token classifier.",
     )
     p.add_argument("--train", required=True, help="training JSONL")
@@ -687,7 +687,7 @@ Expected: PASS (1 passed). Runs 1 training step on CPU with bert-tiny and writes
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/chomsky/train/train.py tests/test_train_smoke.py
+git add src/atos/train/train.py tests/test_train_smoke.py
 git commit -m "feat(train): Trainer entrypoint (LoRA token-cls) + CPU smoke"
 ```
 
@@ -698,15 +698,15 @@ git commit -m "feat(train): Trainer entrypoint (LoRA token-cls) + CPU smoke"
 Loads a trained model, predicts BIOES tags on a holdout JSONL, decodes to spans, and scores with the Plan-1 span evaluator. The pure predict→decode step is testable with a fake "model" callable (argmax over injected logits); the CLI wiring is smoke-tested.
 
 **Files:**
-- Create: `src/chomsky/train/eval_cli.py`
+- Create: `src/atos/train/eval_cli.py`
 - Test: `tests/test_eval_cli.py`
 
 - [ ] **Step 1: Write the failing test (no model download — uses a fake predictor)**
 
 ```python
 # tests/test_eval_cli.py
-from chomsky.train.eval_cli import score_predictions
-from chomsky.schema import Annotation, Span
+from atos.train.eval_cli import score_predictions
+from atos.schema import Annotation, Span
 
 
 def test_score_predictions_matches_gold():
@@ -728,17 +728,17 @@ def test_score_predictions_partial():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/pytest tests/test_eval_cli.py -q`
-Expected: FAIL with `ModuleNotFoundError: No module named 'chomsky.train.eval_cli'`
+Expected: FAIL with `ModuleNotFoundError: No module named 'atos.train.eval_cli'`
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/chomsky/train/eval_cli.py
+# src/atos/train/eval_cli.py
 import argparse
 import json
 from typing import Dict, List
-from chomsky.schema import Annotation
-from chomsky.eval import span_prf1, per_act_f1
+from atos.schema import Annotation
+from atos.eval import span_prf1, per_act_f1
 
 
 def score_predictions(
@@ -753,7 +753,7 @@ def predict_annotations(model_dir: str, texts: List[str], max_length: int = 256)
     import torch
     from transformers import AutoTokenizer
     from peft import AutoPeftModelForTokenClassification
-    from chomsky.train.decode import bioes_tags_to_spans
+    from atos.train.decode import bioes_tags_to_spans
 
     tokenizer = AutoTokenizer.from_pretrained(model_dir, use_fast=True)
     model = AutoPeftModelForTokenClassification.from_pretrained(model_dir)
@@ -781,7 +781,7 @@ def predict_annotations(model_dir: str, texts: List[str], max_length: int = 256)
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="chomsky.train.eval_cli",
+        prog="atos.train.eval_cli",
         description="Span-level evaluation of a trained speech-act model on a holdout.",
     )
     p.add_argument("--model", required=True, help="trained model/adapter dir")
@@ -791,7 +791,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def main(argv=None) -> int:
-    from chomsky.train.data import load_jsonl
+    from atos.train.data import load_jsonl
 
     args = build_arg_parser().parse_args(argv)
     gold = load_jsonl(args.holdout)
@@ -818,7 +818,7 @@ Expected: PASS (Plan 1 + 2 + 3; pure-logic tests always; model/train smokes pass
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/chomsky/train/eval_cli.py tests/test_eval_cli.py
+git add src/atos/train/eval_cli.py tests/test_eval_cli.py
 git commit -m "feat(train): span-level eval CLI (predict -> decode -> F1)"
 ```
 
@@ -848,8 +848,8 @@ Target: Colab A100. Mirrors the Privacy Filter BR setup; applies wiki lora-fine-
 4. Sanity check BEFORE training (avoid NaN — pitfall #5):
    ```python
    import torch
-   from chomsky.train.model import build_model, apply_lora
-   from chomsky.taxonomy import load_taxonomy
+   from atos.train.model import build_model, apply_lora
+   from atos.taxonomy import load_taxonomy
    tax = load_taxonomy("config/taxonomy.yaml")
    m, tok = build_model("neuralmind/bert-base-portuguese-cased", tax)
    m = m.cuda(); m = apply_lora(m)  # .cuda() BEFORE apply_lora (pitfall #1)
@@ -860,13 +860,13 @@ Target: Colab A100. Mirrors the Privacy Filter BR setup; applies wiki lora-fine-
    ```
 5. Train:
    ```bash
-   python -m chomsky.train.train \
+   python -m atos.train.train \
      --train data/dataset.jsonl --out runs/sa-lora \
      --epochs 5 --batch-size 16 --lr 2e-4
    ```
 6. Evaluate (span-F1):
    ```bash
-   python -m chomsky.train.eval_cli --model runs/sa-lora --holdout data/holdout.jsonl
+   python -m atos.train.eval_cli --model runs/sa-lora --holdout data/holdout.jsonl
    ```
 7. Watch for the documented gotchas: Transformers API churn (`eval_strategy`, `processing_class`),
    disk filling from logs (redirect + rotate), and head/target names (`classifier`, `query`/`value`).
@@ -877,7 +877,7 @@ Target: Colab A100. Mirrors the Privacy Filter BR setup; applies wiki lora-fine-
 ```markdown
 ---
 type: concept
-tags: [bertimbau, lora, token-classification, speech-acts, chomsky-project]
+tags: [bertimbau, lora, token-classification, speech-acts, atos-project]
 sources: 0
 updated: 2026-06-04
 ---
@@ -958,4 +958,4 @@ git commit -m "docs: Colab runbook + wiki record for training/eval"
 
 ## Done criteria
 
-Pure-logic suite (data/features/decode) green offline; model/train/eval smokes green with ml deps + network (tiny model); `python -m chomsky.train.train --help` and `... eval_cli --help` work. Real run: train on `data/dataset.jsonl` in Colab A100 per the runbook, then `eval_cli` reports span-F1 on the real-text holdout — the v1 success metric. After Fase 0, only `config/taxonomy.yaml` changes; `num_labels` and id maps follow automatically.
+Pure-logic suite (data/features/decode) green offline; model/train/eval smokes green with ml deps + network (tiny model); `python -m atos.train.train --help` and `... eval_cli --help` work. Real run: train on `data/dataset.jsonl` in Colab A100 per the runbook, then `eval_cli` reports span-F1 on the real-text holdout — the v1 success metric. After Fase 0, only `config/taxonomy.yaml` changes; `num_labels` and id maps follow automatically.

@@ -1,4 +1,4 @@
-from chomsky.collect.models import Vote, SpanResolution
+from atos.collect.models import Vote, SpanResolution
 
 
 def test_vote_is_frozen_and_holds_fields():

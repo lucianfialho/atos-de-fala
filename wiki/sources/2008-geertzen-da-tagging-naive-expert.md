@@ -1,6 +1,6 @@
 ---
 type: source
-tags: [dialogue-acts, dit++, lirics, annotation, agreement, taxonomy, chomsky-project]
+tags: [dialogue-acts, dit++, lirics, annotation, agreement, taxonomy, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -19,7 +19,7 @@ using the **DIT++** tagset (the predecessor of ISO 24617-2). Measures inter-anno
 the effect of **reducing tagset granularity** (collapsing DIT++ hierarchies to the coarser LIRICS
 acts).
 
-## Key Takeaways (and what they validate for chomsky)
+## Key Takeaways (and what they validate for atos)
 
 - **Coarser tagset → higher agreement.** Collapsing fine-grained hierarchies (DIT++ → LIRICS)
   raised κ, especially for non-experts (e.g. auto-feedback 0.36→0.71 naive). **Validates our

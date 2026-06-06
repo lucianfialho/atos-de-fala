@@ -1,4 +1,4 @@
-from chomsky.collect.perception import act_distribution_by_group, groups_disagree
+from atos.collect.perception import act_distribution_by_group, groups_disagree
 
 
 def test_distribution_counts_acts_per_group():

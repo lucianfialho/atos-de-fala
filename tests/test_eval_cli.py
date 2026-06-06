@@ -1,5 +1,5 @@
-from chomsky.train.eval_cli import score_predictions
-from chomsky.schema import Annotation, Span
+from atos.train.eval_cli import score_predictions
+from atos.schema import Annotation, Span
 
 
 def test_score_predictions_matches_gold():

@@ -1,0 +1,1 @@
+"""atos.gen — synthetic speech-act dataset generation pipeline."""

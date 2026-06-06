@@ -5,7 +5,7 @@ pytest.importorskip("torch")
 pytest.importorskip("transformers")
 pytest.importorskip("peft")
 
-from chomsky.train.train import main
+from atos.train.train import main
 
 
 def _write_ds(path):

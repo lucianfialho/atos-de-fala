@@ -4,8 +4,8 @@ pytest.importorskip("torch")
 pytest.importorskip("transformers")
 pytest.importorskip("peft")
 
-from chomsky.train.model import build_model, apply_lora
-from chomsky.taxonomy import Taxonomy
+from atos.train.model import build_model, apply_lora
+from atos.taxonomy import Taxonomy
 
 TINY = "prajjwal1/bert-tiny"
 TAX = Taxonomy(acts=["saudar", "pedir"], definitions={"saudar": "", "pedir": ""})

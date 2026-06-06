@@ -1,5 +1,5 @@
-from chomsky.bioes import char_spans_to_bioes
-from chomsky.schema import Span
+from atos.bioes import char_spans_to_bioes
+from atos.schema import Span
 
 
 def test_single_token_span_gets_S():

@@ -33,9 +33,9 @@ def test_schema_creates_expected_tables():
 def test_insert_items_and_fetch_votes_roundtrip():
     import uuid
     import psycopg
-    from chomsky.collect.db import insert_items, fetch_votes_by_span
-    from chomsky.collect.select import build_items
-    from chomsky.schema import Annotation, Span
+    from atos.collect.db import insert_items, fetch_votes_by_span
+    from atos.collect.select import build_items
+    from atos.schema import Annotation, Span
 
     with psycopg.connect(DSN) as conn:
         _apply_schema(conn)

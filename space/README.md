@@ -14,7 +14,7 @@ license: mit
 # Classificador de Atos de Fala (PT-BR)
 
 Decompõe um texto em português e classifica a **intenção (ato de fala)** de cada trecho.
-(Codinome do projeto: *chomsky* — irônico de propósito; a base teórica é pragmática/Searle, não a sintaxe chomskyana.)
+(Codinome do projeto: *atos* — irônico de propósito; a base teórica é pragmática/Searle, não a sintaxe chomskyana.)
 
 - **Modelo:** BERTimbau (`neuralmind/bert-base-portuguese-cased`) + LoRA, treinado como
   token-classifier BIOES.

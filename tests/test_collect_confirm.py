@@ -1,4 +1,4 @@
-from chomsky.collect.confirm import build_paraphrase_check_prompt, confirm_suggestion
+from atos.collect.confirm import build_paraphrase_check_prompt, confirm_suggestion
 
 
 class FakeClient:

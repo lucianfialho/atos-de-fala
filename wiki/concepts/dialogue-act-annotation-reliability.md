@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [annotation, agreement, taxonomy, kappa, rubric, chomsky-project]
+tags: [annotation, agreement, taxonomy, kappa, rubric, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -21,7 +21,7 @@ dimensions are intrinsically hard (Turn Management, fine Feedback levels); other
 (Social Obligations, coarse Task acts). Inter-annotator agreement alone *underestimates*
 reliability — a gold standard is needed.
 
-## Why It Matters (for chomsky)
+## Why It Matters (for atos)
 
 - Justifies the **compact 13-act v1** taxonomy and dropping dialogue-control dimensions — these
   are the empirically reliable choices.

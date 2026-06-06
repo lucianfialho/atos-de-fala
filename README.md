@@ -61,7 +61,7 @@ A versão atual trabalha com os seguintes atos:
 
 ```text
 config/        Taxonomia e rubrica de anotação
-src/chomsky/   Código Python principal: dados, treino, avaliação e utilitários
+src/atos/   Código Python principal: dados, treino, avaliação e utilitários
 web/           Interface colaborativa em Next.js
 db/            Esquema de dados da coleta colaborativa
 space/         Demo Gradio para experimentação

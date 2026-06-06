@@ -1,4 +1,4 @@
-from chomsky.train.features import align_labels
+from atos.train.features import align_labels
 
 
 def test_special_tokens_become_ignore_index():

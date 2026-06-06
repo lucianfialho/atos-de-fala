@@ -15,8 +15,8 @@ Target: Colab A100. Mirrors the Privacy Filter BR setup; applies wiki lora-fine-
 4. Sanity check BEFORE training (avoid NaN — pitfall #5):
    ```python
    import torch
-   from chomsky.train.model import build_model, apply_lora
-   from chomsky.taxonomy import load_taxonomy
+   from atos.train.model import build_model, apply_lora
+   from atos.taxonomy import load_taxonomy
    tax = load_taxonomy("config/taxonomy.yaml")
    m, tok = build_model("neuralmind/bert-base-portuguese-cased", tax)
    m = m.cuda(); m = apply_lora(m)  # .cuda() BEFORE apply_lora (pitfall #1)
@@ -27,13 +27,13 @@ Target: Colab A100. Mirrors the Privacy Filter BR setup; applies wiki lora-fine-
    ```
 5. Train:
    ```bash
-   python -m chomsky.train.train \
+   python -m atos.train.train \
      --train data/dataset.jsonl --out runs/sa-lora \
      --epochs 5 --batch-size 16 --lr 2e-4
    ```
 6. Evaluate (span-F1):
    ```bash
-   python -m chomsky.train.eval_cli --model runs/sa-lora --holdout data/holdout.jsonl
+   python -m atos.train.eval_cli --model runs/sa-lora --holdout data/holdout.jsonl
    ```
 7. Watch for the documented gotchas: Transformers API churn (`eval_strategy`, `processing_class`),
    disk filling from logs (redirect + rotate), and head/target names (`classifier`, `query`/`value`).

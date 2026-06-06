@@ -4,7 +4,7 @@ Read this file at the start of every session before performing any wiki operatio
 
 ## Purpose
 
-Personal knowledge wiki for the **chomsky** project — research, papers, and accumulated
+Personal knowledge wiki for the **atos** project — research, papers, and accumulated
 learnings on building and fine-tuning language models. Knowledge base seeded from the
 `myFirstSmallModel` wiki (SLM-from-scratch + Privacy Filter BR fine-tuning campaigns).
 

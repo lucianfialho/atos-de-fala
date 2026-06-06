@@ -1,6 +1,6 @@
 import pytest
-from chomsky.agreement import span_agreement, gate
-from chomsky.schema import Annotation, Span
+from atos.agreement import span_agreement, gate
+from atos.schema import Annotation, Span
 
 
 def _ann(spans):

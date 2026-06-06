@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [iso-24617-2, dialogue-acts, diaml, taxonomy, speech-acts, chomsky-project]
+tags: [iso-24617-2, dialogue-acts, diaml, taxonomy, speech-acts, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -31,7 +31,7 @@ and the DAMSL lineage. Annotation is serialized in DiAML (XML) with information-
 
 ## Why It Matters
 
-It is the principled, standards-based source for our label set. For chomsky v1 we take the
+It is the principled, standards-based source for our label set. For atos v1 we take the
 general-purpose + social-obligation functions (mapped to Searle) and drop the dialogue-control
 dimensions (turn/time/feedback), which are irrelevant to open, non-conversational PT-BR text.
 The "functional segment" concept justifies tagging spans, not whole messages.

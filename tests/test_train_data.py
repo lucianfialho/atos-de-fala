@@ -1,5 +1,5 @@
-from chomsky.train.data import load_jsonl
-from chomsky.schema import Annotation, Span
+from atos.train.data import load_jsonl
+from atos.schema import Annotation, Span
 
 
 def test_loads_annotations_skipping_blank_lines(tmp_path):

@@ -6,7 +6,7 @@
 # The code is taxonomy-agnostic — refine the act set here without touching code.
 # `macro` collapses the 13 fine acts into Searle's illocutionary points (Question kept
 # separate, as in dialogue-act work / SweDicS). Used only for coarse / sentence-level
-# eval (chomsky.train.eval_cli --coarse) — additive metadata, does NOT change the v1 set.
+# eval (atos.train.eval_cli --coarse) — additive metadata, does NOT change the v1 set.
 # Macro-classes: assertivo, pergunta, diretivo, comissivo, expressivo.
 acts:
   - name: informar

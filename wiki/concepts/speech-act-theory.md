@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [speech-acts, pragmatics, searle, austin, illocutionary, chomsky-project]
+tags: [speech-acts, pragmatics, searle, austin, illocutionary, atos-project]
 sources: 1
 updated: 2026-06-05
 ---
@@ -30,7 +30,7 @@ ISO 24617-2's general-purpose functions are an operationalization of this tradit
 
 ## Why It Matters
 
-This — not Chomsky's syntax — is the theoretical basis of the chomsky model. Our taxonomy maps
+This — not Chomsky's syntax — is the theoretical basis of the atos model. Our taxonomy maps
 each act to a Searle class so the label set is principled, not ad hoc. Indirect speech acts
 (common in PT-BR: "poderia...?") are why surface form alone is insufficient and a learned model
 is justified.

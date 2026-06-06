@@ -1,6 +1,6 @@
 ---
 type: source
-tags: [dialogue-acts, iso-24617-2, diaml, speech-acts, taxonomy, chomsky-project]
+tags: [dialogue-acts, iso-24617-2, diaml, speech-acts, taxonomy, atos-project]
 sources: 1
 updated: 2026-06-05
 ---

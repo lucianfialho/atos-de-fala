@@ -1,6 +1,6 @@
 ---
 type: concept
-tags: [synthetic-data, teacher-student, distillation, speech-acts, chomsky-project]
+tags: [synthetic-data, teacher-student, distillation, speech-acts, atos-project]
 sources: 0
 updated: 2026-06-05
 ---
@@ -19,14 +19,14 @@ distills the result.
 ## Per-act balancing
 
 Unsteered generation skews to common acts (`informar`), starving rare ones. The CLI counts spans
-per act so far (`chomsky.gen.balance.act_counts`) and, each round, injects the most
+per act so far (`atos.gen.balance.act_counts`) and, each round, injects the most
 under-represented acts (`under_target_acts`, target ≈ n/num_acts) as a FOCUS hint in the
 generation prompt — pushing the dataset toward an even per-act distribution. Disable with
 `--no-balance`. This directly counters the imbalance that capped Porttinari's macro-F1 at 0.295.
 
 ## How It Works
 
-Per example (pure function `chomsky.gen.pipeline.process_example`): resolve quotes→offsets →
+Per example (pure function `atos.gen.pipeline.process_example`): resolve quotes→offsets →
 validate against the taxonomy → if invalid, Claude adjudicates or the example is rejected →
 on a sampled fraction, Claude cross-annotates and span-F1 agreement is measured → keep if
 ≥ threshold, else adjudicate or reject. API I/O is isolated in thin clients; orchestration is

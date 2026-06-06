@@ -1,5 +1,5 @@
-from chomsky.collect.aggregate import resolve_span
-from chomsky.collect.models import Vote
+from atos.collect.aggregate import resolve_span
+from atos.collect.models import Vote
 
 
 def test_unanimous_agree_resolves_to_ai_act_as_gold():

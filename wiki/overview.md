@@ -5,16 +5,16 @@ sources: 12
 updated: 2026-06-06
 ---
 
-# Overview — chomsky
+# Overview — atos (atos de fala)
 
 ## Thesis (defined 2026-06-05)
 
-**chomsky** builds a span-level **speech-act classifier** for **PT-BR**: it decomposes open text
-into non-overlapping spans and labels each with a speech act (intent). The model is BERTimbau
-fine-tuned with LoRA as a BIOES token classifier, distilled from an LLM teacher mixture
+**atos** (atos de fala) builds a span-level **speech-act classifier** for **PT-BR**: it decomposes
+open text into non-overlapping spans and labels each with a speech act (intent). The model is
+BERTimbau fine-tuned with LoRA as a BIOES token classifier, distilled from an LLM teacher mixture
 (Claude rubric/gold + MiniMax bulk, agreement-gated). The taxonomy (13 acts → 53 labels) is
-grounded in ISO 24617-2 + Searle, not in Chomsky's syntax — the name is a nod; the method is
-pragmatics. See [Chomsky vs Pragmatics](concepts/chomsky-vs-pragmatics.md).
+grounded in ISO 24617-2 + Searle (pragmatics), not in Chomsky's syntax. See
+[Chomsky vs Pragmatics](concepts/chomsky-vs-pragmatics.md).
 
 Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstSmallModel` wiki
 (SLM-from-scratch + Privacy Filter BR fine-tuning), which the architecture reuses 1:1
@@ -63,7 +63,7 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   on **real interview transcripts** (Roda Viva / FAPESP, see
   [source](sources/2026-06-06-rodaviva-fapesp-transcripts.md)): the in-browser model proposes,
   the human corrects → `span_annotation`. Real text fixes the synthetic distribution at the source.
-  `chomsky.collect export-spans` then turns those corrections into trainer-format JSONL
+  `atos.collect export-spans` then turns those corrections into trainer-format JSONL
   (group by turn → majority-vote act per span → drop thin/overlapping), **closing the loop**
   collection → retrain → redeploy.
 - **Active-learning plan:** triage by **human disagreement first** (cheapest, no cold-start;

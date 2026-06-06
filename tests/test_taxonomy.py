@@ -1,4 +1,4 @@
-from chomsky.taxonomy import load_taxonomy, bioes_labels, label_maps
+from atos.taxonomy import load_taxonomy, bioes_labels, label_maps
 
 
 def test_load_taxonomy_reads_acts_and_definitions(tmp_path):

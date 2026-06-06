@@ -1,5 +1,5 @@
-from chomsky.train.porttinari import map_label, convert_rows, convert_csv
-from chomsky.schema import Annotation, Span
+from atos.train.porttinari import map_label, convert_rows, convert_csv
+from atos.schema import Annotation, Span
 
 
 def test_map_label_known_and_unknown():
