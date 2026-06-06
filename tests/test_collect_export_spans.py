@@ -1,4 +1,4 @@
-from atos.collect.export_spans import build_annotations
+from atos.collect.export_spans import build_annotations, gold_to_annotations
 
 
 def _row(context, start, end, act, verdict="confirmed"):
@@ -50,3 +50,23 @@ def test_spans_sorted_by_start():
     ]
     anns = build_annotations(rows)
     assert [s.start for s in anns[0].spans] == [0, 4]
+
+
+def _grow(item_id, text, start, end, act):
+    return {"item_id": item_id, "text": text, "char_start": start, "char_end": end, "act": act}
+
+
+def test_gold_to_annotations_groups_by_item_and_sorts_spans():
+    rows = [
+        _grow(1, "Bom dia! Vai?", 9, 13, "perguntar"),
+        _grow(1, "Bom dia! Vai?", 0, 8, "saudar"),
+        _grow(2, "Obrigado.", 0, 9, "agradecer"),
+    ]
+    anns = gold_to_annotations(rows)
+    assert len(anns) == 2
+    a1 = next(a for a in anns if a.text == "Bom dia! Vai?")
+    assert [(s.start, s.end, s.act) for s in a1.spans] == [(0, 8, "saudar"), (9, 13, "perguntar")]
+
+
+def test_gold_to_annotations_empty():
+    assert gold_to_annotations([]) == []

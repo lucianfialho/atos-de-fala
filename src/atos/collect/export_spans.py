@@ -13,6 +13,19 @@ from typing import Dict, List
 from atos.schema import Annotation, Span
 
 
+def gold_to_annotations(rows: List[Dict]) -> List[Annotation]:
+    """Group resolved /jogar gold spans (span_gold) by item into Annotations.
+    rows: [{item_id, text, char_start, char_end, act}]. Spans sorted by start."""
+    by_item: Dict[int, tuple] = {}
+    for r in rows:
+        text, spans = by_item.setdefault(r["item_id"], (r["text"], []))
+        spans.append(Span(r["char_start"], r["char_end"], r["act"]))
+    return [
+        Annotation(text, sorted(spans, key=lambda s: s.start))
+        for text, spans in by_item.values()
+    ]
+
+
 def build_annotations(rows: List[Dict], min_votes: int = 1) -> List[Annotation]:
     # context -> (start, end) -> [act, ...]
     by_ctx: Dict[str, Dict[tuple, List[str]]] = defaultdict(lambda: defaultdict(list))

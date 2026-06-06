@@ -62,6 +62,17 @@ def fetch_perception_records(conn, axis: str) -> List[Dict]:
     return [{"act": act, axis: group} for act, group in rows]
 
 
+def fetch_gold_spans(conn) -> List[Dict]:
+    """Resolved /jogar gold (span_gold) joined to item text + offsets — for the eval holdout."""
+    rows = conn.execute(
+        "select s.item_id, i.text, s.char_start, s.char_end, g.gold_act "
+        "from span_gold g join item_span s on s.id = g.item_span_id "
+        "join item i on i.id = s.item_id"
+    ).fetchall()
+    return [{"item_id": iid, "text": txt, "char_start": cs, "char_end": ce, "act": act}
+            for iid, txt, cs, ce, act in rows]
+
+
 def fetch_spans_with_items(conn) -> List[Dict]:
     """Every span with its item + proposed act — input for active-learning prioritization."""
     rows = conn.execute("select id, item_id, ai_act from item_span").fetchall()

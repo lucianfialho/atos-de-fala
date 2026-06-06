@@ -3,6 +3,7 @@
   ingest                                      print vote counts per span (sanity)
   aggregate --threshold 0.66 --out PATH       resolve spans -> gold JSONL
   export-spans --out PATH --min-votes 1        transcript corrections (/assistir) -> training JSONL
+  export-holdout --out PATH                     collected human gold (jogar + assistir) -> eval JSONL
   prioritize --w-dis 1.0 --w-rar 0.5           active-learning triage -> write item.priority
   confirm                                      confirm pending paraphrases via DeepSeek
   perception --axis region                     act distribution by demographic axis
@@ -30,6 +31,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     es.add_argument("--out", default="gold/collected-spans.jsonl")
     es.add_argument("--min-votes", type=int, default=1)
     es.add_argument("--source", default=None)
+    eh = sub.add_parser("export-holdout")
+    eh.add_argument("--out", default="gold/holdout-collected.jsonl")
     pr = sub.add_parser("prioritize")
     pr.add_argument("--w-dis", type=float, default=1.0, help="weight on human disagreement")
     pr.add_argument("--w-rar", type=float, default=0.5, help="weight on act rarity")
@@ -83,6 +86,18 @@ def main(argv=None) -> int:
             for a in anns:
                 f.write(a.to_json() + "\n")
         print(json.dumps({"examples": len(anns), "spans": sum(len(a.spans) for a in anns)}))
+    elif args.command == "export-holdout":
+        from atos.collect.export_spans import gold_to_annotations, build_annotations
+        jogar = gold_to_annotations(db.fetch_gold_spans(conn))
+        assistir = build_annotations(db.fetch_span_annotations(conn))
+        anns = jogar + assistir
+        out_dir = os.path.dirname(args.out)
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+        with open(args.out, "w", encoding="utf-8") as f:
+            for a in anns:
+                f.write(a.to_json() + "\n")
+        print(json.dumps({"jogar": len(jogar), "assistir": len(assistir), "total": len(anns)}))
     elif args.command == "prioritize":
         from atos.collect.prioritize import compute_priorities
         spans = db.fetch_spans_with_items(conn)
