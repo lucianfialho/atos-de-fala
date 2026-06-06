@@ -69,9 +69,12 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   `atos.collect export-spans` then turns those corrections into trainer-format JSONL
   (group by turn → majority-vote act per span → drop thin/overlapping), **closing the loop**
   collection → retrain → redeploy.
-- **Active-learning plan:** triage by **human disagreement first** (cheapest, no cold-start;
-  `1 − agreement` from the aggregator), then model-uncertainty server-side after the first
-  human-gold retrain. Demographic disagreement is a research output, not noise.
+- **Active learning — fatia C implemented:** `atos.collect prioritize` writes `item.priority`
+  = max over spans of `(1 − weighted_agreement)` [human disagreement, 0 if unvoted] + act
+  rarity; `/api/next-item` serves highest-priority first (tie-break fewest votes, ε-greedy 0.15
+  exploration). Disagreement is the reliable day-one signal (no model, no cold-start); rarity
+  floats up under-represented/unvoted items. Model-uncertainty triage stays a later overlay
+  (needs a human-gold retrain). Demographic disagreement is a research output, not noise.
 - **Repo split:** model (Python, this repo) vs web (`atos-de-fala.vercel.app`). The DB schema
   is owned by the web repo (single source of truth); Python reads it via `TEST_SCHEMA_PATH`.
 
