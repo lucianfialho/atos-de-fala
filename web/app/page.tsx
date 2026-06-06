@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getOrCreateParticipantId } from "@/lib/participant";
 import OnboardingForm from "@/app/components/OnboardingForm";
 import Nav from "@/app/components/Nav";
+import GoalBar from "@/app/components/GoalBar";
 import BrazilMap from "@/app/components/BrazilMap";
 import HowItWorks from "@/app/components/HowItWorks";
 
@@ -23,6 +24,7 @@ export default function LandingPage() {
   return (
     <>
       <Nav />
+      <GoalBar />
       <main style={{ minHeight: "100vh", overflowX: "hidden" }}>
 
         {/* ── 1. Hero — asymmetric grid ──────────────────────────────── */}
