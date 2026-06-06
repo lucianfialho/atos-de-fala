@@ -6,8 +6,11 @@ import { getOrCreateParticipantId } from "@/lib/participant";
 import OnboardingForm from "@/app/components/OnboardingForm";
 import Nav from "@/app/components/Nav";
 import GoalBar from "@/app/components/GoalBar";
-import BrazilMap from "@/app/components/BrazilMap";
 import HowItWorks from "@/app/components/HowItWorks";
+import AnnotatedDemo from "@/app/components/AnnotatedDemo";
+import MapBand from "@/app/components/MapBand";
+import Footer from "@/app/components/Footer";
+import { Underline, CircleScribble } from "@/app/components/marks";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -27,13 +30,9 @@ export default function LandingPage() {
       <GoalBar />
       <main style={{ minHeight: "100vh", overflowX: "hidden" }}>
 
-        {/* ── 1. Hero — asymmetric grid ──────────────────────────────── */}
-        <section className="lp-hero lp-hero-asymmetric" style={{ position: "relative", overflow: "hidden" }}>
-          <div className="orb orb-mint"     style={{ width: 480, height: 480, top: -120, left: -80 }} />
-          <div className="orb orb-peach"    style={{ width: 360, height: 360, top: 80, right: -60 }} />
-          <div className="orb orb-lavender" style={{ width: 260, height: 260, bottom: -60, left: "38%" }} />
-
-          <div className="lp-wide" style={{ position: "relative", zIndex: 1 }}>
+        {/* ── 1. Hero — product demo, asymmetric grid ────────────────── */}
+        <section className="lp-hero lp-hero-asymmetric">
+          <div className="lp-wide">
             <div className="lp-hero-grid">
               <div className="lp-hero-copy">
                 <p className="label" style={{ marginBottom: 18 }}>DATASET ABERTO · PORTUGUÊS BRASILEIRO</p>
@@ -55,8 +54,8 @@ export default function LandingPage() {
                   </a>
                 </div>
               </div>
-              <div className="lp-hero-map">
-                <BrazilMap />
+              <div className="lp-hero-demo">
+                <AnnotatedDemo />
               </div>
             </div>
           </div>
@@ -67,7 +66,10 @@ export default function LandingPage() {
           <div className="lp-center lp-prose">
             <p className="label lp-eyebrow">O QUE É</p>
             <h2 className="display" style={{ fontSize: "clamp(26px, 4vw, 36px)", marginBottom: 20 }}>
-              Atos de fala
+              <span className="mark-word">
+                Atos de fala
+                <Underline className="mark-underline" width={170} height={12} />
+              </span>
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--body)" }}>
               Todo trecho que falamos realiza uma ação: pedir, agradecer, discordar, prometer,
@@ -80,7 +82,10 @@ export default function LandingPage() {
         {/* ── 3. A tese — highlighted card ───────────────────────────── */}
         <section className="lp-section lp-section-tinted">
           <div className="lp-center lp-prose">
-            <div className="card" style={{ padding: "36px 40px", textAlign: "left" }}>
+            <div className="card tese-card" style={{ padding: "36px 40px", textAlign: "left" }}>
+              <span className="tese-scribble" aria-hidden="true">
+                <CircleScribble width={104} height={64} />
+              </span>
               <p className="label lp-eyebrow">A PERGUNTA DE PESQUISA</p>
               <h2 className="display" style={{ fontSize: "clamp(22px, 3.5vw, 30px)", marginBottom: 20 }}>
                 Será que todo mundo lê a mesma intenção?
@@ -98,6 +103,9 @@ export default function LandingPage() {
         {/* ── 4. Como funciona — editorial numbered list ─────────────── */}
         <HowItWorks />
 
+        {/* ── 4b. Mapa — a tese de pesquisa ──────────────────────────── */}
+        <MapBand />
+
         {/* ── 5. Participar ──────────────────────────────────────────── */}
         <section id="participar" className="lp-section lp-section-tinted">
           <div className="lp-center" style={{ maxWidth: 560 }}>
@@ -110,23 +118,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── 6. Footer ──────────────────────────────────────────────── */}
-        <footer className="lp-footer">
-          <div className="lp-center">
-            <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>
-              <a href="#">Dataset aberto CC BY</a>
-              {" · "}
-              <a href="https://huggingface.co/spaces/lucianfialho/atos-de-fala-ptbr" target="_blank" rel="noopener noreferrer">
-                Modelo no Hugging Face
-              </a>
-              {" · "}
-              <a href="https://github.com/lucianfialho/atos-de-fala" target="_blank" rel="noopener noreferrer">
-                Código no GitHub
-              </a>
-              {" · "}
-              <a href="/termo">Termo de uso</a>
-            </p>
-          </div>
-        </footer>
+        <Footer />
 
       </main>
     </>
