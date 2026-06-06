@@ -87,8 +87,23 @@ no teste), não puro erro.
 
 **Conclusão:** o gargalo era **desbalanço, não domínio** (confirma "class imbalance is the killer").
 A loss ponderada deu +0.05 macro sozinha. O mesmo `--class-weights` deve ajudar o **modelo de
-produção (sintético)** nos atos raros — **sem depender da regen/chave de API**. Próximo: retreinar
-o sintético com `--class-weights` e reavaliar zero-shot.
+produção (sintético)** nos atos raros — **sem depender da regen/chave de API**.
+
+### Produção: sintético + `--class-weights` (zero-shot, 2026-06-06)
+
+Retreino do modelo de produção (data/dataset.jsonl, 5086, span-level) com `--class-weights`,
+avaliado zero-shot no Porttinari:
+
+| Modelo | acc | macro-F1 (13) | macro-F1 (coarse) |
+|---|---|---|---|
+| produção atual (sa-lora) | 0.827 | 0.201 | 0.407 |
+| **sintético + class-weights** | 0.834 | **0.233** | **0.428** |
+
+Melhora Pareto: macro-F1 +0.032 (fino) / +0.021 (coarse); `perguntar` 0.62→0.705; `informar` 0.91
+estável; **atos raros saem do chão** (desculpar 0.25, concordar 0.20, discordar/expressar 0.15,
+agradecer 0.13, sugerir 0.13, prometer 0.10, pedir 0.07) — só `oferecer`/`despedir` seguem 0.0.
+Conseguido **sem regen e sem chave de API**, só com a loss ponderada. **Próximo: mergear
+`runs/sa-lora-weighted` → ONNX int8 → subir no HF** pra atualizar o modelo que roda no site.
 
 **O que os números dizem (baseline zero-shot):**
 - O **sinal de intenção primitiva** (assertivo 0.94, pergunta 0.62) é **sólido pros atos dominantes** —
