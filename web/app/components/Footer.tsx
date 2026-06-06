@@ -23,8 +23,11 @@ export default function Footer() {
 
           <nav className="lp-footer-col" aria-label="Recursos">
             <p className="label lp-footer-col-head">RECURSOS</p>
-            <a href="https://huggingface.co/spaces/lucianfialho/atos-de-fala-ptbr" target="_blank" rel="noopener noreferrer">
+            <a href="https://huggingface.co/lucianfialho/atos-de-fala-ptbr" target="_blank" rel="noopener noreferrer">
               Modelo (Hugging Face)
+            </a>
+            <a href="https://huggingface.co/spaces/lucianfialho/atos-de-fala-ptbr" target="_blank" rel="noopener noreferrer">
+              Demo (Space)
             </a>
             <a href="https://github.com/lucianfialho/atos-de-fala" target="_blank" rel="noopener noreferrer">
               Código (GitHub)

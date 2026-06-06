@@ -1,6 +1,7 @@
 import { Underline, CircleScribble } from "@/app/components/marks";
 
 const HF_SPACE = "https://huggingface.co/spaces/lucianfialho/atos-de-fala-ptbr";
+const HF_MODEL = "https://huggingface.co/lucianfialho/atos-de-fala-ptbr";
 
 export function OpenStrip() {
   return (
@@ -11,7 +12,7 @@ export function OpenStrip() {
         <span className="lp-open-item">dataset aberto</span>
         <span className="lp-open-sep" aria-hidden="true">·</span>
         <span className="lp-open-item">
-          <a href={HF_SPACE} target="_blank" rel="noopener noreferrer" className="lp-open-link">
+          <a href={HF_MODEL} target="_blank" rel="noopener noreferrer" className="lp-open-link">
             modelo aberto
           </a>
         </span>
