@@ -345,6 +345,24 @@ input.field-input:focus {
   font-size: 14px;
 }
 
+.lp-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lp-nav-painel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--body);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.lp-nav-painel:hover {
+  color: var(--ink);
+}
+
 /* ── Hero — asymmetric ────────────────────────────────────────────── */
 .lp-hero {
   padding: 80px 0 72px;
@@ -1157,3 +1175,278 @@ input.field-input:focus {
 /* ── Forget-my-data footer link ────────────────────────────────────── */
 .lp-footer-forget { cursor: pointer; }
 .lp-footer-forget-done { color: var(--muted); font-size: 14px; }
+
+/* ── /painel — live progress dashboard ────────────────────────────── */
+.painel-page {
+  min-height: 100vh;
+  background: var(--canvas);
+  padding: 48px 0 80px;
+}
+
+.painel-inner {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.painel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.painel-back {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 8px;
+  display: inline-block;
+  transition: color 0.15s ease;
+}
+
+.painel-back:hover {
+  color: var(--ink);
+}
+
+.painel-title {
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+  margin-top: 4px;
+}
+
+.painel-live-badge {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.painel-live-dot {
+  color: var(--success);
+  font-size: 10px;
+  animation: painel-pulse 2s ease-in-out infinite;
+}
+
+@keyframes painel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* Stat cards grid */
+.painel-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.painel-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+}
+
+.painel-stat-card--wide {
+  grid-column: span 2;
+}
+
+.painel-stat-value {
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.painel-stat-label {
+  margin-top: 2px;
+}
+
+/* Section cards */
+.painel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.painel-section-eyebrow {
+  margin-bottom: 4px;
+}
+
+/* Goal bar inside /painel */
+.painel-goalbar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--hairline);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.painel-goalbar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.painel-goalbar-numbers {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Map wrapper */
+.painel-map-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Bar list */
+.painel-barlist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.painel-barlist-title {
+  margin-bottom: 4px;
+}
+
+.painel-bar-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 48px;
+  align-items: center;
+  gap: 10px;
+}
+
+.painel-bar-label {
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.painel-bar-track {
+  height: 8px;
+  background: var(--hairline);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.painel-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.painel-bar-count {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Profile side-by-side bars */
+.painel-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+/* Concordância section */
+.painel-agree-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.painel-agree-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.painel-agree-num {
+  font-size: clamp(24px, 3.5vw, 36px);
+  line-height: 1;
+  letter-spacing: -0.8px;
+}
+
+.painel-agree-lbl {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.painel-agree-sep {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--hairline-strong);
+}
+
+.painel-concordancia-note {
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.6;
+  max-width: 520px;
+  padding-top: 4px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* CTA */
+.painel-cta-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
+}
+
+.painel-cta-btn {
+  border-radius: 9999px;
+  padding: 0 32px;
+  height: 44px;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .painel-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .painel-stat-card--wide {
+    grid-column: span 2;
+  }
+
+  .painel-bar-row {
+    grid-template-columns: 110px 1fr 40px;
+  }
+
+  .painel-profile-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .painel-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .painel-bar-row {
+    grid-template-columns: 90px 1fr 36px;
+    gap: 6px;
+  }
+}

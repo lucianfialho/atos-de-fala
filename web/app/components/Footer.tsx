@@ -18,6 +18,7 @@ export default function Footer() {
             <a href="/termo">Termo de uso</a>
             <a href="#como-funciona">Como funciona</a>
             <a href="#participar">Participar</a>
+            <a href="/painel">Painel ao vivo</a>
             <ForgetLink />
           </nav>
 
