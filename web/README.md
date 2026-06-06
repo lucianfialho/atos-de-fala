@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# web — Coleta Colaborativa de Atos de Fala (Next.js)
 
-## Getting Started
+Jogo anônimo onde a galera avalia (✓/✗) os atos de fala que a IA atribuiu a frases PT-BR
+e sugere paráfrases (bônus), gravando votos + perfil demográfico no Postgres que o pipeline
+Python (`chomsky.collect`) consome.
 
-First, run the development server:
+## Env
+- `DATABASE_URL` — connection string do Neon (Postgres). Local em `web/.env.local`; na Vercel,
+  em Project Settings → Environment Variables. O `lib/db.ts` lê `process.env.DATABASE_URL`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup local
+1. `cd web && npm install`
+2. `DATABASE_URL=... npm run migrate`   # aplica ../db/schema.sql (contrato compartilhado)
+3. (no repo Python, na raiz) semear itens a anotar:
+   `python -m chomsky.collect export --dataset data/dataset.jsonl --honeypots gold/honeypots.jsonl`
+4. `DATABASE_URL=... npm run dev`        # http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy (Vercel)
+1. Importar o diretório `web/` como projeto na Vercel (**Root Directory = `web`**).
+2. Setar `DATABASE_URL` (Neon) nas env vars da Vercel.
+3. Push → deploy automático. Rodar a migration uma vez apontando pro Neon de produção:
+   `DATABASE_URL=<neon-prod> npm run migrate`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testes
+- `npm test` — unit (scoring, serving, taxonomy), sem banco (Vitest).
+- Build/typecheck: `DATABASE_URL="postgres://u:p@localhost/db" npm run build` (o `neon()` não conecta no build).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Checklist de fumaça e2e (contra um Neon descartável, quando houver banco)
+- [ ] onboarding cria `participant` + `participant_stats`
+- [ ] `/jogar` carrega uma frase com spans
+- [ ] ✓/✗ + Próxima incrementa pontos e streak; nova frase aparece
+- [ ] correção grava `corrected_act`
+- [ ] sugestão grava em `suggestion` e dá +20
+- [ ] item honeypot: errar a isca derruba `reliability` em `participant_stats`
+- [ ] mesma frase não reaparece pro mesmo participante (dedup)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Arquitetura
+O app **só coleta**. Toda a lógica de ML, agregação (concordância ponderada por
+confiabilidade) e análise de percepção fica no pacote Python `chomsky.collect`, que lê/escreve
+o mesmo Postgres. `lib/scoring.ts` é espelho exato de `src/chomsky/collect/score.py` —
+mantenha os dois em sincronia.
