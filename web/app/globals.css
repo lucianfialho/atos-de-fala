@@ -295,7 +295,7 @@ input.field-input:focus {
 
 /* ── Landing page layout helpers ───────────────────────────────────── */
 
-/* Centered content column */
+/* Centered content column (narrow) */
 .lp-center {
   width: 100%;
   max-width: 760px;
@@ -305,13 +305,223 @@ input.field-input:focus {
   padding-right: 24px;
 }
 
-/* Hero section */
-.lp-hero {
-  padding: 100px 0 88px;
-  text-align: center;
+/* Wide content column (up to 1080px for hero / steps) */
+.lp-wide {
+  width: 100%;
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
-/* Generic section */
+/* ── Nav ──────────────────────────────────────────────────────────── */
+.lp-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 60px;
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.lp-nav-inner {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lp-nav-wordmark {
+  font-size: 20px;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+  font-weight: 300;
+  text-decoration: none;
+}
+
+.lp-nav-wordmark:hover {
+  opacity: 0.75;
+}
+
+.lp-nav-cta {
+  height: 36px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+
+/* ── Hero — asymmetric ────────────────────────────────────────────── */
+.lp-hero {
+  padding: 80px 0 72px;
+}
+
+.lp-hero-asymmetric {
+  text-align: left;
+}
+
+.lp-hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.lp-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.lp-hero-h1 {
+  font-size: clamp(38px, 5.5vw, 62px);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  max-width: 540px;
+  margin-bottom: 22px;
+}
+
+/* Pastel tinted mark for "intenção" */
+.hero-mark {
+  background: rgba(167, 229, 211, 0.38);
+  border-radius: 4px;
+  padding: 0 4px;
+  /* Reset browser yellow */
+  color: inherit;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.lp-hero-sub {
+  font-size: 17px;
+  color: var(--body);
+  max-width: 460px;
+  margin-bottom: 36px;
+  line-height: 1.72;
+}
+
+.lp-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lp-hero-map {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ── Brazil map component ─────────────────────────────────────────── */
+.brazil-map-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.brazil-map-svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  display: block;
+}
+
+.brazil-map-meta {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brazil-map-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.brazil-map-legend-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.brazil-map-legend-low {
+  background: rgba(12, 10, 9, 0.07);
+  border: 1px solid var(--hairline);
+}
+
+.brazil-map-legend-high {
+  background: rgba(12, 10, 9, 0.78);
+}
+
+.brazil-map-legend-arrow {
+  color: var(--hairline-strong);
+  font-size: 13px;
+  margin: 0 2px;
+}
+
+.brazil-map-legend-label {
+  white-space: nowrap;
+}
+
+.brazil-map-counter {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.brazil-map-counter-unit {
+  color: var(--muted);
+}
+
+/* Skeleton states */
+.brazil-map-skeleton {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 613 / 639;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-strong);
+}
+
+.brazil-map-skeleton-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--surface-strong) 25%,
+    var(--hairline) 50%,
+    var(--surface-strong) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+.brazil-map-counter-skeleton {
+  width: 220px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--hairline);
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Generic section ──────────────────────────────────────────────── */
 .lp-section {
   padding: 80px 0;
 }
@@ -332,19 +542,54 @@ input.field-input:focus {
   max-width: 640px;
 }
 
-/* Steps grid */
-.lp-steps {
+/* ── Editorial steps list ─────────────────────────────────────────── */
+.lp-steps-editorial {
+  max-width: 760px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.lp-step-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: 80px 1fr;
+  gap: 0 32px;
+  padding: 36px 0;
+  position: relative;
+  align-items: start;
 }
 
-.lp-step-card {
-  padding: 28px 24px;
-  text-align: left;
+.lp-step-numeral {
+  font-size: clamp(48px, 6vw, 72px);
+  line-height: 1;
+  color: var(--hairline-strong);
+  letter-spacing: -2px;
+  padding-top: 2px;
+  /* Intentional: big serif number floats left */
+  font-weight: 300;
 }
 
-/* Footer */
+.lp-step-title {
+  font-size: clamp(20px, 2.5vw, 26px);
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.lp-step-body {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--body);
+  max-width: 540px;
+}
+
+/* Hairline divider between steps (spans both columns) */
+.lp-step-rule {
+  grid-column: 1 / -1;
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: 0;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────── */
 .lp-footer {
   border-top: 1px solid var(--hairline);
   padding: 28px 0;
@@ -357,17 +602,63 @@ input.field-input:focus {
   text-underline-offset: 3px;
 }
 
-/* Responsive: stack steps on narrow viewports */
-@media (max-width: 680px) {
-  .lp-steps {
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .lp-hero-grid {
     grid-template-columns: 1fr;
+    gap: 40px;
   }
 
+  .lp-hero-asymmetric {
+    text-align: center;
+  }
+
+  .lp-hero-copy {
+    align-items: center;
+  }
+
+  .lp-hero-h1 {
+    max-width: 100%;
+  }
+
+  .lp-hero-sub {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .lp-hero-actions {
+    justify-content: center;
+  }
+
+  .lp-hero-map {
+    justify-content: center;
+  }
+
+  .brazil-map-svg {
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 600px) {
   .lp-hero {
-    padding: 72px 0 64px;
+    padding: 64px 0 56px;
   }
 
   .lp-section {
     padding: 56px 0;
+  }
+
+  .lp-step-row {
+    grid-template-columns: 56px 1fr;
+    gap: 0 20px;
+    padding: 28px 0;
+  }
+
+  .lp-step-numeral {
+    font-size: 44px;
+  }
+
+  .lp-step-title {
+    font-size: 20px;
   }
 }
