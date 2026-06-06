@@ -29,6 +29,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-length", type=int, default=256)
     p.add_argument("--fp16", action="store_true",
                    help="mixed-precision fp16 (use on Turing GPUs e.g. RTX 2070; NOT bf16)")
+    p.add_argument("--class-weights", action="store_true",
+                   help="inverse-frequency (sklearn 'balanced') class weights in the loss — "
+                        "counters act imbalance so rare acts aren't collapsed to the majority")
     p.add_argument("--cpu", action="store_true", help="force CPU (smoke/debug)")
     return p
 
@@ -42,6 +45,40 @@ class _Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         return self.rows[i]
+
+
+def compute_class_weights(rows, num_labels, device):
+    """sklearn 'balanced' weights over BIOES labels: total / (num_labels * count).
+    Zero-count labels get weight 1.0 (neutral). Counters the act imbalance in the loss."""
+    import collections
+    counts = collections.Counter()
+    for r in rows:
+        for lab in r["labels"]:
+            if lab != -100:
+                counts[lab] += 1
+    total = sum(counts.values())
+    weights = torch.ones(num_labels, dtype=torch.float)
+    for i in range(num_labels):
+        c = counts.get(i, 0)
+        if c > 0:
+            weights[i] = total / (num_labels * c)
+    return weights.to(device)
+
+
+class WeightedTrainer(Trainer):
+    """Trainer with a class-weighted token-classification loss (ignore_index=-100)."""
+
+    def __init__(self, *a, class_weights=None, **kw):
+        super().__init__(*a, **kw)
+        self._cw = class_weights
+
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+        labels = inputs.get("labels")
+        outputs = model(**inputs)
+        logits = outputs.logits
+        loss_fct = torch.nn.CrossEntropyLoss(weight=self._cw, ignore_index=-100)
+        loss = loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
+        return (loss, outputs) if return_outputs else loss
 
 
 def main(argv=None) -> int:
@@ -76,13 +113,18 @@ def main(argv=None) -> int:
         fp16=args.fp16,
         use_cpu=args.cpu,
     )
-    trainer = Trainer(
+    common = dict(
         model=model,
         args=targs,
         train_dataset=dataset,
         data_collator=collator,
         processing_class=tokenizer,
     )
+    if args.class_weights:
+        weights = compute_class_weights(rows, len(label2id), device)
+        trainer = WeightedTrainer(**common, class_weights=weights)
+    else:
+        trainer = Trainer(**common)
     trainer.train()
     model.save_pretrained(args.out)
     tokenizer.save_pretrained(args.out)
