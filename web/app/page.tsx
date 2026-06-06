@@ -2,8 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getOrCreateParticipantId } from "@/lib/participant";
-
-const REGIONS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+import OnboardingForm from "./components/OnboardingForm";
 
 export default function Onboarding() {
   const router = useRouter();
@@ -18,34 +17,34 @@ export default function Onboarding() {
   }
 
   return (
-    <main style={{ maxWidth: 480, margin: "40px auto", fontFamily: "system-ui", padding: "0 16px" }}>
-      <h1>Atos de Fala — ajude a IA a entender o português</h1>
-      <p>Anônimo. Conte um pouco sobre você (pra pesquisa de como cada perfil interpreta intenções):</p>
-      <label>Faixa de idade
-        <select value={f.ageBand} onChange={(e) => setF({ ...f, ageBand: e.target.value })}>
-          <option value="">—</option>{["18-24","25-34","35-44","45-54","55+"].map((v) => <option key={v}>{v}</option>)}
-        </select>
-      </label>
-      <label>Gênero
-        <select value={f.gender} onChange={(e) => setF({ ...f, gender: e.target.value })}>
-          <option value="">—</option>{["feminino","masculino","outro","prefiro não dizer"].map((v) => <option key={v}>{v}</option>)}
-        </select>
-      </label>
-      <label>Estado (UF)
-        <select value={f.region} onChange={(e) => setF({ ...f, region: e.target.value })}>
-          <option value="">—</option>{REGIONS.map((v) => <option key={v}>{v}</option>)}
-        </select>
-      </label>
-      <label>Escolaridade
-        <select value={f.education} onChange={(e) => setF({ ...f, education: e.target.value })}>
-          <option value="">—</option>{["fundamental","médio","superior","pós"].map((v) => <option key={v}>{v}</option>)}
-        </select>
-      </label>
-      <label style={{ display: "block", margin: "12px 0" }}>
-        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-        {" "}Concordo que minhas respostas entrem em um dataset aberto (CC BY).
-      </label>
-      <button disabled={!ready} onClick={start}>Começar</button>
+    <main style={{ minHeight: "100vh", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      {/* Atmospheric orbs */}
+      <div className="orb orb-mint" style={{ width: 520, height: 520, top: -120, left: "calc(50% - 380px)" }} />
+      <div className="orb orb-peach" style={{ width: 420, height: 420, top: -80, right: "calc(50% - 400px)" }} />
+      <div className="orb orb-lavender" style={{ width: 340, height: 340, top: 200, left: "calc(50% + 160px)" }} />
+
+      {/* Hero */}
+      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "80px 24px 48px" }}>
+        <h1 className="display" style={{ fontSize: "clamp(36px, 6vw, 52px)", lineHeight: 1.15, marginBottom: 16 }}>
+          Atos de Fala
+        </h1>
+        <p style={{ fontSize: 17, color: "var(--muted)", maxWidth: 480, margin: "0 auto", lineHeight: 1.65 }}>
+          Pesquisa anônima sobre como diferentes perfis interpretam intenções comunicativas em português.
+          Suas respostas ajudam a tornar a IA mais precisa — e entram num dataset aberto.
+        </p>
+      </section>
+
+      {/* Form card */}
+      <section style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 520, padding: "0 24px 80px" }}>
+        <OnboardingForm
+          f={f}
+          setF={setF}
+          consent={consent}
+          setConsent={setConsent}
+          ready={!!ready}
+          onStart={start}
+        />
+      </section>
     </main>
   );
 }
