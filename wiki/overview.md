@@ -50,10 +50,13 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   **balance_ratio 0.474**. Known skew: scaffolding acts over-represented — `pedir` 1996,
   `saudar` 1844, `agradecer` 1677. Next step: **negative steering** (cap/penalize acts past
   quota) — capping the three to ~1000 would lift balance to ~0.9.
-- **Decode gotcha:** the Transformers.js token-classification pipeline returns
-  `{entity, score, index, word}` with **no char offsets** — char spans must be reconstructed
-  by walking the text and matching `word` tokens (handling WordPiece `##`). Reading
-  `tok.start/tok.end` yields garbage (whole sentence per token).
+- **In-browser inference gotchas (two):** (1) the Transformers.js token-classification pipeline
+  returns `{entity, score, index, word}` with **no char offsets** — char spans must be
+  reconstructed by walking the text and matching `word` tokens (handling WordPiece `##`);
+  reading `tok.start/tok.end` yields garbage (whole sentence per token). (2) BERTimbau caps at
+  **512 positions** — long transcript turns (e.g. 526 tokens) crash ONNX
+  (`Add: cannot broadcast {1,526,768} vs {1,512,768}`); inputs must be **chunked** at
+  sentence/space boundaries (~600 chars), annotated per chunk, then spans offset back and merged.
 - **Data collection is live** (separate web repo, `atos-de-fala.vercel.app`, Next.js + Neon):
   the `/jogar` game (model proposes span→act, human votes/corrects → gold) and the new
   `/assistir` flow — [Human-in-the-Loop Distillation](concepts/human-in-the-loop-distillation.md)
