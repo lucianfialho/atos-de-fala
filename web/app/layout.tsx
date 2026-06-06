@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, EB_Garamond } from "next/font/google";
+import { Inter, Cormorant } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +7,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const ebGaramond = EB_Garamond({
+const cormorant = Cormorant({
   variable: "--font-serif",
-  weight: ["400", "500"],
+  weight: ["300", "400"],
   subsets: ["latin"],
 });
 
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${ebGaramond.variable}`}>
+    <html lang="pt-BR" className={`${inter.variable} ${cormorant.variable}`}>
       <body>{children}</body>
     </html>
   );

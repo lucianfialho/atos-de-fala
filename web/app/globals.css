@@ -59,7 +59,7 @@ a {
 /* ── Typography ────────────────────────────────────────────────────── */
 .display {
   font-family: var(--font-serif, Georgia, serif);
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.4px;
   color: var(--ink);
 }
