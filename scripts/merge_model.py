@@ -4,15 +4,16 @@ The merged model loads with a plain `AutoModelForTokenClassification.from_pretra
 and works with `pipeline("token-classification")` / the HF Inference API. The config carries
 id2label/label2id (the 53 BIOES labels) so predictions come back as act names, not LABEL_0.
 
-    .venv/bin/python scripts/merge_model.py            # -> runs/sa-merged/
+    .venv/bin/python scripts/merge_model.py [ADAPTER] [OUT]  # defaults: runs/sa-lora -> runs/sa-merged
 """
 import json
+import sys
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 from peft import PeftModel
 from atos.taxonomy import load_taxonomy, bioes_labels, label_maps
 
-ADAPTER = "runs/sa-lora"
-OUT = "runs/sa-merged"
+ADAPTER = sys.argv[1] if len(sys.argv) > 1 else "runs/sa-lora"
+OUT = sys.argv[2] if len(sys.argv) > 2 else "runs/sa-merged"
 
 
 def main() -> int:
