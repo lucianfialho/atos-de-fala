@@ -64,8 +64,14 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   - **In-domain FT + `--class-weights`:** macro-F1 **0.262** (coarse **0.439**) — rare acts off the
     floor (sugerir 0.31, discordar 0.19); **~89% of the paper SOTA with only the loss fix, no data
     work.** Empirically confirms "class imbalance is the killer". The new `WeightedTrainer`
-    (inverse-frequency loss) is the training-side lever, complementary to data-side steering — and
-    it should lift the **production synthetic** model on rare acts without the API-blocked regen.
+    (inverse-frequency loss) is the training-side lever, complementary to data-side steering.
+  - **Shipped as v2 (2026-06-06):** the production model was retrained on the synthetic set with
+    `--class-weights`; **zero-shot** Porttinari macro-F1 **0.201 → 0.233** (coarse 0.407 → 0.428),
+    `perguntar` 0.62 → 0.71, rare acts off the floor (desculpar 0.25, concordar 0.20, …), nothing
+    regressed — a Pareto win with **no regen and no API key**. Merged → ONNX int8 (export_onnx now
+    quantizes) → published to HF `lucianfialho/atos-de-fala-ptbr`, live in the browser demo +
+    `/assistir`. (Caveat: Transformers.js caches the model per-URL, so returning visitors may keep
+    v1 until cache clears.)
 - **In-browser inference gotchas (two):** (1) the Transformers.js token-classification pipeline
   returns `{entity, score, index, word}` with **no char offsets** — char spans must be
   reconstructed by walking the text and matching `word` tokens (handling WordPiece `##`);
