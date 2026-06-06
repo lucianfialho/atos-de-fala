@@ -1,66 +1,51 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { getOrCreateParticipantId } from "@/lib/participant";
 
-export default function Home() {
+const REGIONS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+
+export default function Onboarding() {
+  const router = useRouter();
+  const [f, setF] = useState({ ageBand: "", gender: "", region: "", education: "" });
+  const [consent, setConsent] = useState(false);
+  const ready = consent && f.ageBand && f.gender && f.region && f.education;
+
+  async function start() {
+    const id = getOrCreateParticipantId();
+    await fetch("/api/participant", { method: "POST", body: JSON.stringify({ id, ...f }) });
+    router.push("/jogar");
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main style={{ maxWidth: 480, margin: "40px auto", fontFamily: "system-ui", padding: "0 16px" }}>
+      <h1>Atos de Fala — ajude a IA a entender o português</h1>
+      <p>Anônimo. Conte um pouco sobre você (pra pesquisa de como cada perfil interpreta intenções):</p>
+      <label>Faixa de idade
+        <select value={f.ageBand} onChange={(e) => setF({ ...f, ageBand: e.target.value })}>
+          <option value="">—</option>{["18-24","25-34","35-44","45-54","55+"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+      </label>
+      <label>Gênero
+        <select value={f.gender} onChange={(e) => setF({ ...f, gender: e.target.value })}>
+          <option value="">—</option>{["feminino","masculino","outro","prefiro não dizer"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+      </label>
+      <label>Estado (UF)
+        <select value={f.region} onChange={(e) => setF({ ...f, region: e.target.value })}>
+          <option value="">—</option>{REGIONS.map((v) => <option key={v}>{v}</option>)}
+        </select>
+      </label>
+      <label>Escolaridade
+        <select value={f.education} onChange={(e) => setF({ ...f, education: e.target.value })}>
+          <option value="">—</option>{["fundamental","médio","superior","pós"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+      </label>
+      <label style={{ display: "block", margin: "12px 0" }}>
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        {" "}Concordo que minhas respostas entrem em um dataset aberto (CC BY).
+      </label>
+      <button disabled={!ready} onClick={start}>Começar</button>
+    </main>
   );
 }
