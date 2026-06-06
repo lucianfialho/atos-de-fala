@@ -87,7 +87,15 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   the human corrects → `span_annotation`. Real text fixes the synthetic distribution at the source.
   `atos.collect export-spans` then turns those corrections into trainer-format JSONL
   (group by turn → majority-vote act per span → drop thin/overlapping), **closing the loop**
-  collection → retrain → redeploy.
+  collection → retrain → redeploy. `atos.collect export-holdout` builds an **eval set** from the
+  collected human gold (span_gold + span_annotation) that grows with collection.
+- **Collection state (2026-06-06) — the bottleneck is traffic, not code.** 15 participants, 214
+  votes but **only 2 corrections**, 23 resolved `span_gold`, 11 `span_annotation`. The holdout
+  exporter runs (21 examples), but the number is **noise + circular bias**: the /jogar gold is
+  model-*confirmed* spans (~1.0 by construction), and almost no disagreements exist (self/test
+  traffic). A usable eval set + human training gold both need **real annotators** (volume +
+  corrections + demographic diversity) — the next move is human, not code (team annotation sprint /
+  paid micro-batch / course partnership / share hook).
 - **Active learning — fatia C implemented:** `atos.collect prioritize` writes `item.priority`
   = max over spans of `(1 − weighted_agreement)` [human disagreement, 0 if unvoted] + act
   rarity; `/api/next-item` serves highest-priority first (tie-break fewest votes, ε-greedy 0.15
