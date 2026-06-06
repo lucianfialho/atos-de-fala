@@ -1,7 +1,7 @@
 ---
 type: synthesis
-tags: [language-models, fine-tuning, training, speech-acts, ner]
-sources: 12
+tags: [language-models, fine-tuning, training, speech-acts, ner, oraktron]
+sources: 13
 updated: 2026-06-06
 ---
 
@@ -78,6 +78,19 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
 - **Repo split:** model (Python, this repo) vs web (`atos-de-fala.vercel.app`). The DB schema
   is owned by the web repo (single source of truth); Python reads it via `TEST_SCHEMA_PATH`.
 
+## ORAKTRON — the bigger frame (2026-06-06)
+
+`atos de fala` is the **first concrete piece of [[oraktron-pragmatic-os]]** — a 4-layer vision
+(syntax → semantics → **pragmatics** → causal pragmatics) that aims to make human *intention* a
+computable, auditable object. Atos de fala is **Layer 3, axis 1** (the primitive speech-act /
+intentionality axis). The plan is to build Layer 3 incrementally as **orthogonal axes** — one
+[[bertimbau-lora-token-cls|LoRA adapter]] per axis, stacked on a frozen encoder, built in parallel
+by the team, plus a **shared multi-axis pool** for the cross-axis synthesis ([[layered-pragmatic-axes]]).
+The competitive vacuum (no unified multi-axis pragmatic engine) is documented in
+[[2026-06-oraktron-competitive-differential]] (anchor: Ma et al., ACL 2025). **Honest:** the
+compositional "intention" claim and the causal/outcome Layer 4 are hypotheses, not demonstrated —
+near-term value is interpretable Layer-3 decomposition; causal is the star to steer by, not promise.
+
 ## Portable Theses
 
 1. **Domain restriction enables size reduction.** A 15M-param GPT trained only on TinyStories
@@ -150,3 +163,4 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
 - [Privacy Filter BR v2 — Plan](sources/2026-05-07-privacy-filter-br-v2-plan.md)
 - [Privacy Filter BR v2 — Execution Log](sources/2026-05-16-privacy-filter-br-v2-execution.md)
 - [Memória Roda Viva (FAPESP) — interview transcripts](sources/2026-06-06-rodaviva-fapesp-transcripts.md)
+- [ORAKTRON — Competitive Differential (internal)](sources/2026-06-oraktron-competitive-differential.md)
