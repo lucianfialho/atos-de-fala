@@ -24,6 +24,12 @@ under-represented acts (`under_target_acts`, target ≈ n/num_acts) as a FOCUS h
 generation prompt — pushing the dataset toward an even per-act distribution. Disable with
 `--no-balance`. This directly counters the imbalance that capped Porttinari's macro-F1 at 0.295.
 
+**Negative steering** complements the FOCUS hint: positive steering alone can't stop the teacher
+from emitting conversational scaffolding (saudar/agradecer/pedir) in every dialogue. Once an act
+reaches its quota, `over_target_acts` feeds it as an "EVITE" avoid-list in the prompt (skip
+gratuitous courtesy openings/closings), so over-represented acts stop inflating. Tune with
+`--avoid-k` (0 disables).
+
 ## How It Works
 
 Per example (pure function `atos.gen.pipeline.process_example`): resolve quotes→offsets →

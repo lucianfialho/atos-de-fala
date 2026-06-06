@@ -48,8 +48,11 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   (CC BY). Runs **in the browser** via Transformers.js/WebGPU (dtype q8), wasm fallback.
 - **Dataset v1 (synthetic):** 5086 examples, 15816 spans, 3.11 spans/ex, 0 without spans,
   **balance_ratio 0.474**. Known skew: scaffolding acts over-represented — `pedir` 1996,
-  `saudar` 1844, `agradecer` 1677. Next step: **negative steering** (cap/penalize acts past
-  quota) — capping the three to ~1000 would lift balance to ~0.9.
+  `saudar` 1844, `agradecer` 1677. **Negative steering implemented** (`over_target_acts` +
+  an "EVITE" avoid-list clause in the generation prompt + `--avoid-k`): once an act hits its
+  per-act quota the teacher is told to skip gratuitous courtesy openings/closings, so it stops
+  inflating scaffolding. Complements positive `focus`; a rebalanced regen run is the next step
+  to actually move 0.47 → ~0.9.
 - **In-browser inference gotchas (two):** (1) the Transformers.js token-classification pipeline
   returns `{entity, score, index, word}` with **no char offsets** — char spans must be
   reconstructed by walking the text and matching `word` tokens (handling WordPiece `##`);
