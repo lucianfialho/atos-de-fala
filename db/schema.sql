@@ -57,17 +57,22 @@ create table if not exists participant_stats (
   items_done     int not null default 0
 );
 
--- human annotations created while watching a public YouTube video (real text + act).
+-- spans a human selected-and-marked inside a real transcript (e.g. Roda Viva / FAPESP).
+-- The local model proposes spans→acts; the human confirms/corrects (distillation-in-the-loop).
 -- Dedicated table: this is already human gold, it doesn't go through the voting pool.
-create table if not exists video_annotation (
+create table if not exists span_annotation (
   id             bigserial primary key,
   participant_id uuid not null references participant(id) on delete cascade,
-  video_id       text not null,              -- YouTube video id (11 chars)
-  ts_seconds     double precision not null,  -- moment in the video
-  text           text not null,              -- the utterance the human typed
-  act            text not null,              -- one of the 13 acts
-  span_start     int,                        -- optional sub-span (phase 2); null = whole text
-  span_end       int,
+  source         text not null,              -- corpus, e.g. 'rodaviva'
+  source_ref     text not null,              -- interview url/id (provenance)
+  speaker        text,                       -- who said it (from the transcript)
+  context        text not null,              -- the full turn the span came from
+  text           text not null,              -- the span text (the training unit)
+  char_start     int not null,               -- offset of span within context
+  char_end       int not null,
+  act            text not null,              -- human's final label (one of the 13 acts)
+  model_act      text,                       -- what the local model proposed (null = human-added span)
+  verdict        text not null default 'confirmed', -- 'confirmed' | 'corrected' | 'added'
   created_at     timestamptz not null default now()
 );
 
@@ -82,5 +87,5 @@ create index if not exists idx_vote_span on vote(item_span_id);
 create index if not exists idx_span_item on item_span(item_id);
 create index if not exists idx_suggestion_status on suggestion(status);
 create index if not exists idx_rate_hit_bucket_time on rate_hit(bucket, created_at);
-create index if not exists idx_video_annotation_participant on video_annotation(participant_id);
-create index if not exists idx_video_annotation_video on video_annotation(video_id);
+create index if not exists idx_span_annotation_participant on span_annotation(participant_id);
+create index if not exists idx_span_annotation_source on span_annotation(source, source_ref);
