@@ -9,8 +9,24 @@ const plex = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Atos de Fala — PT-BR",
-  description: "Pesquisa sobre atos de fala em português brasileiro",
+  metadataBase: new URL("https://atos-de-fala.vercel.app"),
+  title: "Atos de Fala — ensine a IA a entender a intenção em português",
+  description:
+    "Jogo de dataset aberto: ajude a IA a entender a intenção (ato de fala) por trás do que a gente diz em português brasileiro. Anônimo, leva 2 minutos.",
+  openGraph: {
+    title: "Atos de Fala — ensine a IA a entender a intenção em português",
+    description:
+      "Ajude a IA a entender a intenção por trás do que a gente diz. Dataset aberto, anônimo.",
+    url: "https://atos-de-fala.vercel.app",
+    siteName: "Atos de Fala",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Atos de Fala — ensine a IA a entender a intenção",
+    description: "Dataset aberto de atos de fala em PT-BR. Anônimo, 2 minutos.",
+  },
 };
 
 export default function RootLayout({
