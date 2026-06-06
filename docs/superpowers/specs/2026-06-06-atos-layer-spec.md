@@ -45,10 +45,32 @@ Isso destrava três usos concretos **antes** do ORAKTRON completo:
 A camada está **travada** quando:
 
 - **Contrato estável** (seção 3) — entrada/saída fixas, versionadas.
-- **Barra de qualidade medida** contra benchmark público: span/sentence-level no **Porttinari**
+- **Barra de qualidade medida** contra benchmark público: sentence-level no **Porttinari**
   (holdout PT-BR), reportando macro-F1 por ato (não só weighted — o desbalanço esconde os atos raros).
   Meta de referência (do doc competitivo): **≥ 70% do F1 do classificador SOTA dedicado** no eixo de
   atos. Abaixo disso, recuar pro claim arquitetural.
+
+### Baseline medido (2026-06-06, zero-shot / fora-de-domínio)
+
+`atos.train.eval_cli --model runs/sa-lora --holdout data/porttinari-holdout.jsonl --mode sentence`
+(n=4091). O modelo treinou em **sintético**, avaliado **zero-shot** no Porttinari (notícia real):
+
+| Granularidade | accuracy | macro-F1 | destaque |
+|---|---|---|---|
+| 13 atos | 0.827 | **0.201** | informar 0.91, perguntar 0.62; oferecer/despedir/desculpar = 0.0 |
+| coarse (Searle) | 0.879 | **0.407** | assertivo 0.94, pergunta 0.62; comissivo 0.02 |
+
+Baseline do paper (BERTimbau treinado **no** Porttinari, in-domain) = **0.295 macro-F1**. Estamos em
+**~68% disso, zero-shot** — logo abaixo da barra de 70%, mas é comparação dura (eles in-domain, nós não).
+
+**O que os números dizem:**
+- O **sinal de intenção primitiva** (assertivo 0.94, pergunta 0.62) é **sólido pros atos dominantes** —
+  exatamente o que `act_distribution`/`primitive_intent` precisam ("80% informar → informar").
+- A fraqueza está concentrada em atos **raros/comissivos/diretivos** (oferecer/prometer/desculpar/
+  despedir/pedir). Causa: viés do sintético — ele está **inflado justo nos atos que notícia real quase
+  não tem** (saudar/agradecer/pedir). `agradecer` deu precision 1.0 / recall 0.08 → quase não existe no
+  Porttinari. É a mesma raiz do desbalanço (0.47). Conserto: regen rebalanceada + gold humano + (talvez)
+  fine-tune in-domain.
 - **Distribuição saudável** no dataset de treino: `balance_ratio` alvo ~0.9 (hoje 0.47 — depende da
   regen rebalanceada, travada em chave de API).
 - **Gold humano real** entrando pela coleta (`/jogar` + `/assistir`) e fechando o ciclo via
@@ -117,6 +139,8 @@ a aposta. Detalhe completo em [[layered-pragmatic-axes]] e [[oraktron-pragmatic-
 - O uso "baratear/rotear LLM" (seção 1) é **hipótese a medir** com o experimento Claude — não dado.
 - `primitive_intent` = ato dominante é uma **aproximação grosseira** da intenção; a intenção real é
   o conjunto dos eixos, que ainda não temos. Não confundir "ato dominante" com "intenção".
-- A barra ≥70% SOTA depende de rodar o eval no Porttinari — ainda não medido formalmente.
+- Barra ≥70% SOTA: **medido — ~68% zero-shot** (seção 2). Quase lá, mas ainda não "competitivo"
+  pelo critério; fechar a lacuna depende de rebalancear/gold/in-domain. Comparação é dura (paper é
+  in-domain), então 68% zero-shot valida transferência, não vende competitividade.
 - Determinístico = forward pass fixo, **não** regra simbólica; é um modelo aprendido. Documentar isso
   pra não prometer determinismo que não existe.
