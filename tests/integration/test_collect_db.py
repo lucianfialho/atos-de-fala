@@ -2,12 +2,18 @@ import os
 import pytest
 
 DSN = os.environ.get("TEST_DATABASE_URL")
-pytestmark = pytest.mark.skipif(not DSN, reason="set TEST_DATABASE_URL to run DB integration tests")
+# The DB schema is owned by the web repo (single source of truth). Point this at its
+# db/schema.sql to run the integration tests against a disposable Postgres.
+SCHEMA_PATH = os.environ.get("TEST_SCHEMA_PATH")
+pytestmark = pytest.mark.skipif(
+    not (DSN and SCHEMA_PATH),
+    reason="set TEST_DATABASE_URL and TEST_SCHEMA_PATH (web repo db/schema.sql) to run DB integration tests",
+)
 
 
 # Requer um Postgres DESCARTÁVEL em TEST_DATABASE_URL: aplica o schema (idempotente) e não faz teardown.
 def _apply_schema(conn):
-    with open("db/schema.sql", encoding="utf-8") as f:
+    with open(SCHEMA_PATH, encoding="utf-8") as f:
         conn.execute(f.read())
     conn.commit()
 
