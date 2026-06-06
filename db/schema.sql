@@ -57,6 +57,14 @@ create table if not exists participant_stats (
   items_done     int not null default 0
 );
 
+-- sliding-window rate limiting (one row per allowed mutating request; bucket = "ip:route")
+create table if not exists rate_hit (
+  id          bigserial primary key,
+  bucket      text not null,
+  created_at  timestamptz not null default now()
+);
+
 create index if not exists idx_vote_span on vote(item_span_id);
 create index if not exists idx_span_item on item_span(item_id);
 create index if not exists idx_suggestion_status on suggestion(status);
+create index if not exists idx_rate_hit_bucket_time on rate_hit(bucket, created_at);

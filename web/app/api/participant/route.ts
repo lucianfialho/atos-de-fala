@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { getIp, rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
+  if (!(await rateLimit(`${getIp(req)}:participant`, 10, 60))) {
+    return NextResponse.json({ error: "muitas requisições, calma aí" }, { status: 429 });
+  }
   const { id, ageBand, gender, region, education } = await req.json();
   if (!id || !ageBand || !gender || !region || !education) {
     return NextResponse.json({ error: "missing fields" }, { status: 400 });

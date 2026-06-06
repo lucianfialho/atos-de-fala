@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { applyItemOutcome, Stats } from "@/lib/scoring";
+import { getIp, rateLimit } from "@/lib/rateLimit";
 
 // body: { participant, itemId, votes: [{ spanId, verdict, correctedAct? }] }
 export async function POST(req: Request) {
+  if (!(await rateLimit(`${getIp(req)}:vote`, 40, 60))) {
+    return NextResponse.json({ error: "muitas requisições, calma aí" }, { status: 429 });
+  }
   const { participant, itemId, votes } = await req.json();
   if (!participant || !itemId || !Array.isArray(votes) || votes.length === 0) {
     return NextResponse.json({ error: "missing fields" }, { status: 400 });
