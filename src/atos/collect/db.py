@@ -62,6 +62,20 @@ def fetch_perception_records(conn, axis: str) -> List[Dict]:
     return [{"act": act, axis: group} for act, group in rows]
 
 
+def fetch_spans_with_items(conn) -> List[Dict]:
+    """Every span with its item + proposed act — input for active-learning prioritization."""
+    rows = conn.execute("select id, item_id, ai_act from item_span").fetchall()
+    return [{"span_id": sid, "item_id": iid, "ai_act": act} for sid, iid, act in rows]
+
+
+def update_item_priorities(conn, priorities: Dict[int, float]) -> int:
+    """Write active-learning priority per item (atos.collect prioritize)."""
+    for item_id, pr in priorities.items():
+        conn.execute("update item set priority=%s where id=%s", (pr, item_id))
+    conn.commit()
+    return len(priorities)
+
+
 def fetch_span_annotations(conn, source: Optional[str] = None) -> List[Dict]:
     """Human-corrected spans from transcripts (/assistir). One row per saved span."""
     q = ("select source, source_ref, speaker, context, char_start, char_end, act, verdict "
