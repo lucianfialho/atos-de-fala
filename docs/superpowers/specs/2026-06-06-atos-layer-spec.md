@@ -63,7 +63,27 @@ A camada está **travada** quando:
 Baseline do paper (BERTimbau treinado **no** Porttinari, in-domain) = **0.295 macro-F1**. Estamos em
 **~68% disso, zero-shot** — logo abaixo da barra de 70%, mas é comparação dura (eles in-domain, nós não).
 
-**O que os números dizem:**
+### Fine-tune in-domain (variante A, 2026-06-06) — resultado negativo revelador
+
+Split 80/20 do Porttinari (train 3272 / test 819), LoRA 5 épocas, **sem class weights**:
+
+| Modelo | acc | macro-F1 (13) | macro-F1 (coarse) |
+|---|---|---|---|
+| zero-shot (só sintético) | 0.827 | 0.201 | 0.407 |
+| in-domain FT (sem pesos) | **0.938** | 0.214 | 0.388 |
+| paper SOTA (in-domain **+ pesos**) | ~0.92 | **0.295** | — |
+
+Per-ato do FT: `informar` 0.967, `perguntar` 0.96, **e todo o resto 0.0**. O modelo **colapsou na
+classe majoritária** — accuracy disparou (notícia é quase toda informar), mas macro-F1 mal mexeu e o
+coarse até piorou. Os resultados do paper usam `weights_True` (class weights) pra chegar nos 0.295;
+nosso trainer **não tem peso de classe** → colapsou.
+
+**Conclusão:** in-domain sozinho **não é o fix** — o gargalo é **desbalanço**, não domínio (confirma
+"class imbalance is the killer"). O pipeline aprende in-domain (informar/perguntar ~0.96), a
+arquitetura é sã. O lever real (serve p/ sintético E in-domain): **class weights / focal loss / dado
+rebalanceado**. Próximo passo concreto: adicionar peso de classe ao trainer e re-rodar.
+
+**O que os números dizem (baseline zero-shot):**
 - O **sinal de intenção primitiva** (assertivo 0.94, pergunta 0.62) é **sólido pros atos dominantes** —
   exatamente o que `act_distribution`/`primitive_intent` precisam ("80% informar → informar").
 - A fraqueza está concentrada em atos **raros/comissivos/diretivos** (oferecer/prometer/desculpar/
