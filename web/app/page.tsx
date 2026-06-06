@@ -1,10 +1,18 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getOrCreateParticipantId } from "@/lib/participant";
-import OnboardingForm from "./components/OnboardingForm";
+import OnboardingForm from "@/app/components/OnboardingForm";
+import Nav from "@/app/components/Nav";
+import GoalBar from "@/app/components/GoalBar";
+import HowItWorks from "@/app/components/HowItWorks";
+import LiveDemo from "@/app/components/LiveDemo";
+import MapBand from "@/app/components/MapBand";
+import Footer from "@/app/components/Footer";
+import { OpenStrip, OQueE, ATeseCard } from "@/app/components/LandingSections";
 
-export default function Onboarding() {
+export default function LandingPage() {
   const router = useRouter();
   const [f, setF] = useState({ ageBand: "", gender: "", region: "", education: "" });
   const [consent, setConsent] = useState(false);
@@ -17,34 +25,72 @@ export default function Onboarding() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center" }}>
-      {/* Atmospheric orbs */}
-      <div className="orb orb-mint" style={{ width: 520, height: 520, top: -120, left: "calc(50% - 380px)" }} />
-      <div className="orb orb-peach" style={{ width: 420, height: 420, top: -80, right: "calc(50% - 400px)" }} />
-      <div className="orb orb-lavender" style={{ width: 340, height: 340, top: 200, left: "calc(50% + 160px)" }} />
+    <>
+      <Nav />
+      <GoalBar />
+      <main style={{ minHeight: "100vh", overflowX: "hidden" }}>
 
-      {/* Hero */}
-      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "80px 24px 48px" }}>
-        <h1 className="display" style={{ fontSize: "clamp(36px, 6vw, 52px)", lineHeight: 1.15, marginBottom: 16 }}>
-          Atos de Fala
-        </h1>
-        <p style={{ fontSize: 17, color: "var(--muted)", maxWidth: 480, margin: "0 auto", lineHeight: 1.65 }}>
-          Pesquisa anônima sobre como diferentes perfis interpretam intenções comunicativas em português.
-          Suas respostas ajudam a tornar a IA mais precisa — e entram num dataset aberto.
-        </p>
-      </section>
+        {/* ── 1. Hero — product demo, asymmetric grid ────────────────── */}
+        <section className="lp-hero lp-hero-asymmetric">
+          <div className="lp-wide">
+            <div className="lp-hero-grid">
+              <div className="lp-hero-copy">
+                <p className="label" style={{ marginBottom: 18 }}>DATASET ABERTO · PORTUGUÊS BRASILEIRO</p>
+                <h1 className="display lp-hero-h1">
+                  Ensine a IA a entender a{" "}
+                  <mark className="hero-mark">intenção</mark>
+                  {" "}por trás do que a gente diz.
+                </h1>
+                <p className="lp-hero-sub">
+                  Quando você diz "você pode me passar o sal?", não é uma pergunta — é um pedido.
+                  As máquinas erram isso o tempo todo em português. Ajude a corrigir, jogando.
+                </p>
+                <div className="lp-hero-actions">
+                  <a className="btn-ink" href="#participar" style={{ height: 48, padding: "0 28px", fontSize: 16 }}>
+                    Participar
+                  </a>
+                  <a className="btn-outline" href="#como-funciona" style={{ height: 48, padding: "0 28px", fontSize: 16 }}>
+                    Como funciona
+                  </a>
+                </div>
+              </div>
+              <div className="lp-hero-demo">
+                <LiveDemo />
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* Form card */}
-      <section style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 520, padding: "0 24px 80px" }}>
-        <OnboardingForm
-          f={f}
-          setF={setF}
-          consent={consent}
-          setConsent={setConsent}
-          ready={!!ready}
-          onStart={start}
-        />
-      </section>
-    </main>
+        {/* ── 1b. Open-model strip ───────────────────────────────────── */}
+        <OpenStrip />
+
+        {/* ── 2. O que é ─────────────────────────────────────────────── */}
+        <OQueE />
+
+        {/* ── 3. A tese — highlighted card ───────────────────────────── */}
+        <ATeseCard />
+
+        {/* ── 4. Como funciona — editorial numbered list ─────────────── */}
+        <HowItWorks />
+
+        {/* ── 4b. Mapa — a tese de pesquisa ──────────────────────────── */}
+        <MapBand />
+
+        {/* ── 5. Participar ──────────────────────────────────────────── */}
+        <section id="participar" className="lp-section lp-section-tinted">
+          <div className="lp-center" style={{ maxWidth: 560 }}>
+            <p className="label lp-eyebrow" style={{ textAlign: "center" }}>PARTICIPAR</p>
+            <p style={{ fontSize: 16, color: "var(--muted)", textAlign: "center", marginBottom: 32, lineHeight: 1.6 }}>
+              Anônimo, sem cadastro. Conte um pouco sobre você e comece a jogar.
+            </p>
+            <OnboardingForm f={f} setF={setF} consent={consent} setConsent={setConsent} ready={!!ready} onStart={start} />
+          </div>
+        </section>
+
+        {/* ── 6. Footer ──────────────────────────────────────────────── */}
+        <Footer />
+
+      </main>
+    </>
   );
 }

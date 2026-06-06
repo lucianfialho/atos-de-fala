@@ -10,3 +10,13 @@ export function getOrCreateParticipantId(): string {
   }
   return id;
 }
+
+// The stored id without creating one (null if this browser never participated).
+export function getExistingParticipantId(): string | null {
+  return localStorage.getItem(KEY);
+}
+
+// Forget this browser's identity (used by the "esquecer meus dados" flow).
+export function clearParticipantId(): void {
+  localStorage.removeItem(KEY);
+}

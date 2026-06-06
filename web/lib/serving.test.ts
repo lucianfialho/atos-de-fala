@@ -24,4 +24,14 @@ describe("pickNextItem", () => {
     const got = pickNextItem([c(5, true, 1)], 0);
     expect(got!.id).toBe(5);
   });
+  it("randomizes among items tied at the minimum vote count (always picks a min-tied one)", () => {
+    // four normals all at 0 votes -> any of them is valid; over many runs it must vary AND
+    // never pick a higher-voted item.
+    const pool = [c(1, false, 0), c(2, false, 0), c(3, false, 0), c(4, false, 0), c(9, false, 5)];
+    const picked = new Set<number>();
+    for (let i = 0; i < 60; i++) picked.add(pickNextItem(pool, 0)!.id);
+    expect(picked.has(9)).toBe(false);            // never the higher-voted one
+    expect([...picked].every((id) => id !== 9)).toBe(true);
+    expect(picked.size).toBeGreaterThan(1);       // genuinely randomized across the tie band
+  });
 });

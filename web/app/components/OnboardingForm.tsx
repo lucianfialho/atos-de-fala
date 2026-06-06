@@ -65,7 +65,11 @@ export default function OnboardingForm({ f, setF, consent, setConsent, ready, on
           onChange={(e) => setConsent(e.target.checked)}
           style={{ marginTop: 3, accentColor: "var(--primary)", flexShrink: 0 }}
         />
-        Concordo que minhas respostas entrem em um dataset aberto (CC BY).
+        Concordo que minhas respostas entrem em um{" "}
+        <a href="/termo" style={{ color: "var(--ink)", textDecoration: "underline", textUnderlineOffset: 2 }}>
+          dataset aberto (CC BY)
+        </a>
+        .
       </label>
 
       <button

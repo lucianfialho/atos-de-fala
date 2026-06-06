@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant } from "next/font/google";
+import { IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const cormorant = Cormorant({
-  variable: "--font-serif",
-  weight: ["300", "400"],
+const plex = IBM_Plex_Sans({
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
@@ -24,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${cormorant.variable}`}>
+    <html lang="pt-BR" className={plex.variable}>
       <body>{children}</body>
     </html>
   );
