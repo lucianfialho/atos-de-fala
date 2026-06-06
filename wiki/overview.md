@@ -70,8 +70,17 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
     `perguntar` 0.62 → 0.71, rare acts off the floor (desculpar 0.25, concordar 0.20, …), nothing
     regressed — a Pareto win with **no regen and no API key**. Merged → ONNX int8 (export_onnx now
     quantizes) → published to HF `lucianfialho/atos-de-fala-ptbr`, live in the browser demo +
-    `/assistir`. (Caveat: Transformers.js caches the model per-URL, so returning visitors may keep
-    v1 until cache clears.)
+    `/assistir`. (Caveat: Transformers.js caches the model per-URL, so the front pins a tagged
+    `revision` — bump it + create the HF tag on each new model — so returning visitors get the new one.)
+  - **Per-act weakness → collection priorities (v2, with support).** Reading per-act F1 *with the
+    Porttinari support count* separates real weakness from benchmark blind spots:
+    - **Measured-weak (prioritize): `discordar` (F1 0.15, n=88), `sugerir` (0.13, n=64),
+      `expressar_emocao` (0.15, n=37), `pedir` (0.07, n=25)** — real news examples exist and the model fails.
+    - **Benchmark-blind (collect to even measure): `oferecer`/`despedir` (n=0), `desculpar` (n=1),
+      `prometer` (n=6), `concordar` (n=10), `agradecer` (n=13)** — news has ~none, so Porttinari can't
+      score them; only our own collected gold can.
+    - **Already good (don't waste annotation): `informar` 0.91, `perguntar` 0.71.**
+    This directs the `/assistir` catalog (curated by act-focus in the web repo) and the annotation sprint.
 - **In-browser inference gotchas (two):** (1) the Transformers.js token-classification pipeline
   returns `{entity, score, index, word}` with **no char offsets** — char spans must be
   reconstructed by walking the text and matching `word` tokens (handling WordPiece `##`);
