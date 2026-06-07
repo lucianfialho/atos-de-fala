@@ -6,7 +6,8 @@ label speech-act spans per turn with our rubric, resolves quotes → char offset
 appends valid annotations to a training JSONL. Silver, not gold (carries teacher bias) — meant to
 be MIXED with synthetic + human gold, never used as eval.
 
-    ANTHROPIC_API_KEY=... .venv/bin/python -m atos.gen.annotate_corpus \
+    KIMI_API_KEY=... .venv/bin/python -m atos.gen.annotate_corpus \
+        --provider kimi \
         --urls https://rodaviva.fapesp.br/materia/470/entrevistados/mano_brown_2007.htm \
         --out data/corpus-silver.jsonl
 """
@@ -19,8 +20,25 @@ from atos.resolve import resolve_quoted_spans
 from atos.validator import validate
 from atos.gen.fapesp import fetch_interview
 from atos.gen.prompts import build_annotation_prompt, parse_llm_json
-from atos.gen.claude import ClaudeClient
 from atos.gen.dataset import append_annotation, load_done_annotations
+
+
+def _make_client(provider: str, model):
+    """Instantiate the chosen teacher; only pass model if the user overrode it."""
+    kw = {"model": model} if model else {}
+    if provider == "claude":
+        from atos.gen.claude import ClaudeClient
+        return ClaudeClient(**kw)
+    if provider == "kimi":
+        from atos.gen.kimi import KimiClient
+        return KimiClient(**kw)
+    if provider == "deepseek":
+        from atos.gen.deepseek import DeepSeekClient
+        return DeepSeekClient(**kw)
+    if provider == "minimax":
+        from atos.gen.minimax import MiniMaxClient
+        return MiniMaxClient(**kw)
+    raise ValueError(f"unknown provider: {provider}")
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -32,7 +50,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", required=True, help="output JSONL (append + resume)")
     p.add_argument("--rubric", default="config/rubric.md")
     p.add_argument("--taxonomy", default="config/taxonomy.yaml")
-    p.add_argument("--model", default="claude-sonnet-4-6")
+    p.add_argument("--provider", choices=["claude", "kimi", "deepseek", "minimax"], default="kimi",
+                   help="teacher LLM (default kimi — Kimi K2 / Moonshot)")
+    p.add_argument("--model", default=None, help="override the provider's default model")
     p.add_argument("--min-chars", type=int, default=20, help="skip turns shorter than this")
     p.add_argument("--max-chars", type=int, default=400, help="skip long monologues (keep trainable)")
     p.add_argument("--limit", type=int, default=0, help="cap turns annotated (0 = no cap)")
@@ -44,7 +64,7 @@ def run(args) -> int:
     taxonomy = load_taxonomy(args.taxonomy)
     with open(args.rubric, encoding="utf-8") as f:
         rubric = f.read()
-    client = ClaudeClient(model=args.model)
+    client = _make_client(args.provider, args.model)
     done = {a.text for a in load_done_annotations(args.out)}
 
     turns = []
