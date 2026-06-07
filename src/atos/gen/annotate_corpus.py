@@ -13,7 +13,6 @@ be MIXED with synthetic + human gold, never used as eval.
 """
 import argparse
 import json
-import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
@@ -21,7 +20,8 @@ from atos.taxonomy import load_taxonomy
 from atos.resolve import resolve_quoted_spans
 from atos.validator import validate
 from atos.gen.fapesp import fetch_interview
-from atos.gen.prompts import build_annotation_prompt, parse_llm_json
+from atos.gen.prompts import build_annotation_prompt, build_correction_prompt, parse_llm_json
+from atos.gen.teachers import make_client
 from atos.gen.dataset import append_annotation, load_done_annotations
 
 
@@ -31,30 +31,6 @@ _SMART = str.maketrans({"’": "'", "‘": "'", "“": '"', "”": '"'})
 
 def _normalize(s: str) -> str:
     return s.translate(_SMART)
-
-
-def _make_client(provider: str, model):
-    """Instantiate the chosen teacher; only pass model if the user overrode it."""
-    kw = {"model": model} if model else {}
-    if provider == "claude":
-        from atos.gen.claude import ClaudeClient
-        return ClaudeClient(**kw)
-    if provider == "kimi-code":
-        # Kimi Code subscription — Anthropic-compatible endpoint (ClaudeClient speaks it).
-        from atos.gen.claude import ClaudeClient
-        key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
-        base = os.environ.get("KIMI_BASE_URL", "https://api.kimi.com/coding/v1/messages")
-        return ClaudeClient(api_key=key, base_url=base, model=model or "kimi-k2-0905-preview")
-    if provider == "kimi":
-        from atos.gen.kimi import KimiClient
-        return KimiClient(**kw)
-    if provider == "deepseek":
-        from atos.gen.deepseek import DeepSeekClient
-        return DeepSeekClient(**kw)
-    if provider == "minimax":
-        from atos.gen.minimax import MiniMaxClient
-        return MiniMaxClient(**kw)
-    raise ValueError(f"unknown provider: {provider}")
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -76,6 +52,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-chars", type=int, default=400, help="skip long monologues (keep trainable)")
     p.add_argument("--limit", type=int, default=0, help="cap turns annotated (0 = no cap)")
     p.add_argument("--concurrency", type=int, default=8, help="parallel teacher calls (I/O-bound)")
+    p.add_argument("--correct", action="store_true",
+                   help="correction mode: the student model annotates first, the teacher only fixes "
+                        "its errors (cheaper, error-focused). Requires --student-model.")
+    p.add_argument("--student-model", default=None, help="student adapter dir (for --correct)")
+    p.add_argument("--max-length", type=int, default=256, help="student token max_length (--correct)")
     p.add_argument("--debug", action="store_true")
     return p
 
@@ -84,7 +65,7 @@ def run(args) -> int:
     taxonomy = load_taxonomy(args.taxonomy)
     with open(args.rubric, encoding="utf-8") as f:
         rubric = f.read()
-    client = _make_client(args.provider, args.model)
+    client = make_client(args.provider, args.model)
     done = {a.text for a in load_done_annotations(args.out)}
 
     if not args.urls and not args.text_file:
@@ -108,10 +89,24 @@ def run(args) -> int:
         if args.limit and len(cands) >= args.limit:
             break
 
+    # correction mode: the student annotates first; the teacher only fixes its errors
+    proposed = {}
+    if args.correct:
+        if not args.student_model:
+            raise SystemExit("--correct requires --student-model")
+        from atos.train.eval_cli import predict_annotations
+        preds = predict_annotations(args.student_model, cands, args.taxonomy, args.max_length)
+        proposed = {
+            txt: [{"quote": txt[s.start:s.end], "act": s.act} for s in ann.spans]
+            for txt, ann in zip(cands, preds)
+        }
+
     def work(text):
         """Annotate one utterance (runs in a worker thread; pure I/O)."""
         try:
-            items = parse_llm_json(client.complete(build_annotation_prompt(rubric, text)))["spans"]
+            msgs = (build_correction_prompt(rubric, text, proposed.get(text, []))
+                    if args.correct else build_annotation_prompt(rubric, text))
+            items = parse_llm_json(client.complete(msgs))["spans"]
             ann, errs = resolve_quoted_spans(text, items)
             errs = list(errs) + validate(ann, taxonomy)
             return (ann, None) if not errs else (None, errs)

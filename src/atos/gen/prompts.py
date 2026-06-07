@@ -67,6 +67,22 @@ def build_generation_prompt(
     return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]
 
 
+def build_correction_prompt(rubric: str, text: str, proposed: List[Dict]) -> List[Dict]:
+    """Teacher-as-corrector: a smaller model already annotated `text`; the teacher confirms the
+    correct spans, fixes wrong act/boundaries, removes non-acts, and ADDS missed ones. Cheaper
+    than annotating from scratch and focuses the teacher on the student's errors."""
+    import json as _json
+    user = (
+        f"{rubric}\n\n"
+        f"Um modelo menor já anotou os atos de fala do texto abaixo. REVISE a anotação dele: "
+        f"confirme os spans corretos, corrija ato/fronteira errados, remova o que não é ato, e "
+        f"ADICIONE atos que faltaram. NAO altere o texto. Responda com a anotação FINAL no formato "
+        f'{{"text": "<texto inalterado>", "spans": [{{"quote": "trecho exato", "act": "<ato>"}}]}}.\n\n'
+        f"TEXTO:\n{text}\n\nANOTACAO DO MODELO:\n{_json.dumps(proposed, ensure_ascii=False)}"
+    )
+    return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]
+
+
 def build_annotation_prompt(rubric: str, text: str) -> List[Dict]:
     user = (
         f"{rubric}\n\n"
