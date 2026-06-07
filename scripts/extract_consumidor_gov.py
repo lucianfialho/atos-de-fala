@@ -22,13 +22,28 @@ import random
 import re
 
 _SENT = re.compile(r"(?<=[.!?])\s+|\n+")
+_WORD = re.compile(r"[A-Za-zÀ-ÿ]{2,}")
+_CODEY = re.compile(r"protocolo|\bn[ºo°]\b|\bID\b|\bSAC\b|\bCPF\b|\bCNPJ\b", re.I)
+
+
+def _is_junk(s: str) -> bool:
+    """Drop boilerplate that's technically 'informar' but worthless to annotate:
+    protocol/ID/number lines, code strings, anything too sparse on real words."""
+    words = _WORD.findall(s)
+    if len(words) < 4:
+        return True
+    if sum(c.isalpha() for c in s) / max(1, len(s)) < 0.55:  # digit/punct heavy
+        return True
+    if _CODEY.search(s) and any(c.isdigit() for c in s):  # "Protocolo nº ABC123"
+        return True
+    return False
 
 
 def turns(text: str, lo: int, hi: int) -> list:
     out = []
     for sent in _SENT.split(text or ""):
         sent = re.sub(r"\s{2,}", " ", sent).strip(" \t,.;")
-        if lo <= len(sent) <= hi and "http" not in sent and any(c.isalpha() for c in sent):
+        if lo <= len(sent) <= hi and "http" not in sent and not _is_junk(sent):
             out.append(sent)
     return out
 
