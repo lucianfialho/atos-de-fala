@@ -13,6 +13,7 @@ be MIXED with synthetic + human gold, never used as eval.
 """
 import argparse
 import json
+import os
 import sys
 
 from atos.taxonomy import load_taxonomy
@@ -29,6 +30,12 @@ def _make_client(provider: str, model):
     if provider == "claude":
         from atos.gen.claude import ClaudeClient
         return ClaudeClient(**kw)
+    if provider == "kimi-code":
+        # Kimi Code subscription — Anthropic-compatible endpoint (ClaudeClient speaks it).
+        from atos.gen.claude import ClaudeClient
+        key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
+        base = os.environ.get("KIMI_BASE_URL", "https://api.kimi.com/coding/v1/messages")
+        return ClaudeClient(api_key=key, base_url=base, model=model or "kimi-k2-0905-preview")
     if provider == "kimi":
         from atos.gen.kimi import KimiClient
         return KimiClient(**kw)
@@ -50,8 +57,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", required=True, help="output JSONL (append + resume)")
     p.add_argument("--rubric", default="config/rubric.md")
     p.add_argument("--taxonomy", default="config/taxonomy.yaml")
-    p.add_argument("--provider", choices=["claude", "kimi", "deepseek", "minimax"], default="kimi",
-                   help="teacher LLM (default kimi — Kimi K2 / Moonshot)")
+    p.add_argument("--provider",
+                   choices=["claude", "kimi-code", "kimi", "deepseek", "minimax"], default="kimi-code",
+                   help="teacher LLM (default kimi-code — Kimi Code subscription, Anthropic-compatible)")
     p.add_argument("--model", default=None, help="override the provider's default model")
     p.add_argument("--min-chars", type=int, default=20, help="skip turns shorter than this")
     p.add_argument("--max-chars", type=int, default=400, help="skip long monologues (keep trainable)")
