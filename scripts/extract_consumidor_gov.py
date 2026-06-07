@@ -23,16 +23,26 @@ import re
 
 _SENT = re.compile(r"(?<=[.!?])\s+|\n+")
 _WORD = re.compile(r"[A-Za-zÀ-ÿ]{2,}")
+_LETTER = re.compile(r"[A-Za-zÀ-ÿ]")
 _CODEY = re.compile(r"protocolo|\bn[ºo°]\b|\bID\b|\bSAC\b|\bCPF\b|\bCNPJ\b", re.I)
+# sign-offs/headers are the main PII vector (agent signatures, "Nome / Cargo") AND boilerplate.
+_SIGNOFF = re.compile(r"^\s*(atenciosamente|cordialmente|att\.?|abraç|equipe\b|ouvidoria|"
+                      r"central de atendimento|canal de comunica)", re.I)
 
 
 def _is_junk(s: str) -> bool:
-    """Drop boilerplate that's technically 'informar' but worthless to annotate:
-    protocol/ID/number lines, code strings, anything too sparse on real words."""
+    """Drop boilerplate that's technically 'informar' but worthless to annotate — and, crucially,
+    the lines that carry names: agent signatures ('Nome / Cargo'), sign-offs, ALL-CAPS headers,
+    protocol/ID/number lines, and anything too sparse on real words."""
     words = _WORD.findall(s)
     if len(words) < 4:
         return True
-    if sum(c.isalpha() for c in s) / max(1, len(s)) < 0.55:  # digit/punct heavy
+    letters = _LETTER.findall(s)
+    if len(letters) / max(1, len(s)) < 0.55:  # digit/punct heavy
+        return True
+    if sum(c.isupper() for c in letters) / max(1, len(letters)) > 0.7:  # ALL-CAPS header
+        return True
+    if " / " in s or _SIGNOFF.search(s):  # "Grazielle Duarte / Assistente", sign-offs
         return True
     if _CODEY.search(s) and any(c.isdigit() for c in s):  # "Protocolo nº ABC123"
         return True
