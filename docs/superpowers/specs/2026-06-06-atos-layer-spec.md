@@ -63,6 +63,22 @@ A camada está **travada** quando:
 Baseline do paper (BERTimbau treinado **no** Porttinari, in-domain) = **0.295 macro-F1**. Estamos em
 **~68% disso, zero-shot** — logo abaixo da barra de 70%, mas é comparação dura (eles in-domain, nós não).
 
+### v3 — mix silver-real + sintético + class-weights (2026-06-07) — valida o lever #1
+
+`annotate-corpus` (Kimi Code, endpoint Anthropic) anotou **505 exemplos de texto dialógico real**
+(5 entrevistas FAPESP) → misturado com o sintético (5086) → train `--class-weights`. Zero-shot Porttinari:
+
+| Modelo | acc | macro-F1 (13) |
+|---|---|---|
+| v2 (só sintético + pesos) | 0.834 | 0.233 |
+| **v3 (mix silver+sintético + pesos)** | 0.862 | **0.269** |
+
++0.036 macro, **acima do in-domain-weighted (0.262)** e **~91% do SOTA in-domain do paper (0.295),
+sendo zero-shot**. Maior salto: `perguntar` 0.62→**0.80** (onde o silver de entrevista tinha cobertura
+real). **Confirma a hipótese da pesquisa: texto real fecha o gap** ([[synthetic-data-techniques]] lever #1).
+Caveat: ganho concentrado nos atos que entrevista contém; comissivos (oferecer/despedir/prometer)
+seguem rasos → precisam de outra fonte de gênero (atendimento/negociação/reviews), não mais entrevista.
+
 ### Fine-tune in-domain (variante A, 2026-06-06) — resultado negativo revelador
 
 Split 80/20 do Porttinari (train 3272 / test 819), LoRA 5 épocas, **sem class weights**:
