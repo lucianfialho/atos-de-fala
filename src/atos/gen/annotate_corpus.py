@@ -61,7 +61,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
         prog="atos.gen.annotate_corpus",
         description="Teacher-annotate real dialogic transcripts (FAPESP) -> training JSONL.",
     )
-    p.add_argument("--urls", nargs="+", required=True, help="rodaviva.fapesp.br interview URLs")
+    p.add_argument("--urls", nargs="*", default=[], help="rodaviva.fapesp.br interview URLs")
+    p.add_argument("--text-file", default=None,
+                   help="generic source: a plain-text file, one utterance per line (B2W, SAC, etc.)")
     p.add_argument("--out", required=True, help="output JSONL (append + resume)")
     p.add_argument("--rubric", default="config/rubric.md")
     p.add_argument("--taxonomy", default="config/taxonomy.yaml")
@@ -83,9 +85,14 @@ def run(args) -> int:
     client = _make_client(args.provider, args.model)
     done = {a.text for a in load_done_annotations(args.out)}
 
+    if not args.urls and not args.text_file:
+        raise SystemExit("provide --urls and/or --text-file")
     turns = []
     for url in args.urls:
         turns.extend(fetch_interview(url))
+    if args.text_file:
+        with open(args.text_file, encoding="utf-8") as f:
+            turns.extend({"speaker": None, "text": ln.strip()} for ln in f if ln.strip())
 
     kept = rejected = 0
     for t in turns:
