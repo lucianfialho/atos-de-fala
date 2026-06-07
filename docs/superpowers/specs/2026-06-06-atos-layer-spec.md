@@ -118,6 +118,24 @@ no teste), não puro erro.
 A loss ponderada deu +0.05 macro sozinha. O mesmo `--class-weights` deve ajudar o **modelo de
 produção (sintético)** nos atos raros — **sem depender da regen/chave de API**.
 
+### v5 — correção em escala (996 entrevistas corrigidas) — PLATÔ vs v3
+
+Modo correção (`annotate-corpus --correct --student-model`): o aluno v3 propôs spans em ~1000 turnos
+de **13 entrevistas FAPESP** (URL `materia/<id>/` parseia sem slug), Kimi-code corrigiu só os erros
+(concorrência 8). 996 exemplos → mix com sintético → train `--class-weights`. Zero-shot Porttinari:
+
+| Modelo | macro-F1 | acc |
+|---|---|---|
+| v3 (505 entrevista, from-scratch) | **0.269** | 0.862 |
+| v5 (996 entrevista, **correção**) | 0.263 | 0.877 |
+
+**v5 ≈ v3 (empate no ruído).** Dobrar a entrevista via correção **não superou** o v3. Conclusões:
+(1) benefício de **texto de entrevista saturou** (~0.26-0.27 no benchmark de notícia); (2) **correção
+≈ from-scratch** nesta métrica (não ganhou claramente — mas é mais barata + dado mais limpo; ganho
+talvez só visível num eval justo); (3) somando v3(↑)/v4(↓ OOD)/v5(platô): **estamos eval-bound** —
+Porttinari não distingue mais melhorias, tudo converge a ~0.27. **Manter v3 no ar.** Próximo movimento
+de valor: **eval multi-domínio honesto** (gold humano), não mais dado/método.
+
 ### Produção: sintético + `--class-weights` (zero-shot, 2026-06-06)
 
 Retreino do modelo de produção (data/dataset.jsonl, 5086, span-level) com `--class-weights`,
