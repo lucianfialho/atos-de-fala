@@ -15,6 +15,7 @@ import argparse
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 from atos.taxonomy import load_taxonomy
 from atos.resolve import resolve_quoted_spans
@@ -74,6 +75,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--min-chars", type=int, default=20, help="skip turns shorter than this")
     p.add_argument("--max-chars", type=int, default=400, help="skip long monologues (keep trainable)")
     p.add_argument("--limit", type=int, default=0, help="cap turns annotated (0 = no cap)")
+    p.add_argument("--concurrency", type=int, default=8, help="parallel teacher calls (I/O-bound)")
     p.add_argument("--debug", action="store_true")
     return p
 
@@ -94,31 +96,41 @@ def run(args) -> int:
         with open(args.text_file, encoding="utf-8") as f:
             turns.extend({"speaker": None, "text": ln.strip()} for ln in f if ln.strip())
 
-    kept = rejected = 0
+    # candidates: normalize, length-filter, dedup, skip already-done (resume)
+    seen = set()
+    cands = []
     for t in turns:
         text = _normalize(t["text"])
-        if not (args.min_chars <= len(text) <= args.max_chars) or text in done:
+        if not (args.min_chars <= len(text) <= args.max_chars) or text in done or text in seen:
             continue
+        seen.add(text)
+        cands.append(text)
+        if args.limit and len(cands) >= args.limit:
+            break
+
+    def work(text):
+        """Annotate one utterance (runs in a worker thread; pure I/O)."""
         try:
             items = parse_llm_json(client.complete(build_annotation_prompt(rubric, text)))["spans"]
             ann, errs = resolve_quoted_spans(text, items)
             errs = list(errs) + validate(ann, taxonomy)
-            if errs:
+            return (ann, None) if not errs else (None, errs)
+        except Exception as e:  # noqa: BLE001 — one bad turn shouldn't kill the run
+            return (None, e)
+
+    kept = rejected = 0
+    # workers do HTTP; all file writes happen here on the main thread (no locking needed)
+    with ThreadPoolExecutor(max_workers=max(1, args.concurrency)) as pool:
+        for ann, err in pool.map(work, cands):
+            if ann is not None:
+                append_annotation(args.out, ann)
+                kept += 1
+                print(f"kept {kept}/{len(cands)} (rejected {rejected})")
+            else:
                 rejected += 1
                 if args.debug:
-                    print(f"[reject] {errs} :: {text[:60]!r}", file=sys.stderr)
-                continue
-            append_annotation(args.out, ann)
-            done.add(text)
-            kept += 1
-            print(f"kept {kept} (rejected {rejected})")
-        except Exception as e:  # noqa: BLE001 — one bad turn shouldn't kill the run
-            rejected += 1
-            if args.debug:
-                print(f"[error] {e}", file=sys.stderr)
-        if args.limit and kept >= args.limit:
-            break
-    print(json.dumps({"kept": kept, "rejected": rejected}))
+                    print(f"[reject] {err}", file=sys.stderr)
+    print(json.dumps({"kept": kept, "rejected": rejected, "candidates": len(cands)}))
     return 0
 
 
