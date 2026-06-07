@@ -7,16 +7,20 @@ from typing import Dict, List
 from atos.schema import Annotation
 
 
-def _item_row(ann: Annotation, is_honeypot: bool) -> Dict:
+def _item_row(ann: Annotation, is_honeypot: bool, source: str) -> Dict:
     spans: List[Dict] = []
     for order, s in enumerate(ann.spans):
         span = {"char_start": s.start, "char_end": s.end, "ai_act": s.act, "display_order": order}
         if is_honeypot:
             span["gold_act"] = s.act
         spans.append(span)
-    return {"text": ann.text, "source": "synthetic", "is_honeypot": is_honeypot, "spans": spans}
+    return {"text": ann.text, "source": source, "is_honeypot": is_honeypot, "spans": spans}
 
 
-def build_items(annotations: List[Annotation], honeypots: List[Annotation]) -> List[Dict]:
-    """`annotations`: model output to be judged. `honeypots`: gold whose acts are known."""
-    return [_item_row(a, False) for a in annotations] + [_item_row(h, True) for h in honeypots]
+def build_items(annotations: List[Annotation], honeypots: List[Annotation],
+                source: str = "synthetic") -> List[Dict]:
+    """`annotations`: model output to be judged. `honeypots`: gold whose acts are known.
+    `source` tags the domain (review/sac/entrevista/...) so collected gold can be sliced
+    per-domain later (atos.train.multidomain). Honeypots keep their own 'honeypot' source."""
+    return ([_item_row(a, False, source) for a in annotations]
+            + [_item_row(h, True, "honeypot") for h in honeypots])

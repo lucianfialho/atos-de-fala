@@ -23,6 +23,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     e = sub.add_parser("export")
     e.add_argument("--dataset", default=None)
     e.add_argument("--honeypots", default=None)
+    e.add_argument("--source", default="synthetic",
+                   help="domain tag for the seeded items (review/sac/entrevista/...)")
     sub.add_parser("ingest")
     a = sub.add_parser("aggregate")
     a.add_argument("--threshold", type=float, default=0.66)
@@ -60,7 +62,7 @@ def main(argv=None) -> int:
         from atos.collect.select import build_items
         anns = _load_annotations(args.dataset)
         hps = _load_annotations(args.honeypots) if args.honeypots else []
-        ids = db.insert_items(conn, build_items(anns, hps))
+        ids = db.insert_items(conn, build_items(anns, hps, args.source))
         print(json.dumps({"inserted_spans": len(ids)}))
     elif args.command == "ingest":
         by_span = db.fetch_votes_by_span(conn)
