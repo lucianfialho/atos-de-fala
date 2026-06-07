@@ -33,6 +33,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     es.add_argument("--source", default=None)
     eh = sub.add_parser("export-holdout")
     eh.add_argument("--out", default="gold/holdout-collected.jsonl")
+    eh.add_argument("--domain", default="entrevista",
+                    help="tag each line with this domain for multi-domain eval "
+                         "(jogar/assistir gold is FAPESP interviews -> entrevista)")
     pr = sub.add_parser("prioritize")
     pr.add_argument("--w-dis", type=float, default=1.0, help="weight on human disagreement")
     pr.add_argument("--w-rar", type=float, default=0.5, help="weight on act rarity")
@@ -96,8 +99,11 @@ def main(argv=None) -> int:
             os.makedirs(out_dir, exist_ok=True)
         with open(args.out, "w", encoding="utf-8") as f:
             for a in anns:
-                f.write(a.to_json() + "\n")
-        print(json.dumps({"jogar": len(jogar), "assistir": len(assistir), "total": len(anns)}))
+                obj = json.loads(a.to_json())
+                obj["domain"] = args.domain
+                f.write(json.dumps(obj, ensure_ascii=False) + "\n")
+        print(json.dumps({"jogar": len(jogar), "assistir": len(assistir),
+                          "total": len(anns), "domain": args.domain}))
     elif args.command == "prioritize":
         from atos.collect.prioritize import compute_priorities
         spans = db.fetch_spans_with_items(conn)

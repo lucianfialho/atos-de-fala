@@ -19,6 +19,7 @@ counterpart (oferecer, saudar, despedir) simply never appear in this news corpus
 """
 import argparse
 import csv
+import json
 import sys
 from typing import Dict, List, Optional, Tuple
 from atos.schema import Annotation, Span
@@ -92,6 +93,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="path to the Porttinari annotated CSV",
     )
     p.add_argument("--out", required=True, help="output JSONL path")
+    p.add_argument("--domain", default=None,
+                   help="if set, tag every line with this domain (for atos.train.multidomain). "
+                        "Porttinari is news -> use 'noticia'.")
     return p
 
 
@@ -100,7 +104,12 @@ def main(argv=None) -> int:
     anns, stats = convert_csv(args.csv)
     with open(args.out, "w", encoding="utf-8") as f:
         for ann in anns:
-            f.write(ann.to_json() + "\n")
+            if args.domain:
+                obj = json.loads(ann.to_json())
+                obj["domain"] = args.domain
+                f.write(json.dumps(obj, ensure_ascii=False) + "\n")
+            else:
+                f.write(ann.to_json() + "\n")
     print(
         f"wrote {stats['kept']} annotations to {args.out} "
         f"(skipped: {stats['skipped_unmapped']} unmapped, "
