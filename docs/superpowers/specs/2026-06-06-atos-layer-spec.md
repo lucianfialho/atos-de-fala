@@ -79,7 +79,20 @@ real). **Confirma a hipótese da pesquisa: texto real fecha o gap** ([[synthetic
 Caveat: ganho concentrado nos atos que entrevista contém; comissivos (oferecer/despedir/prometer)
 seguem rasos → precisam de outra fonte de gênero (atendimento/negociação/reviews), não mais entrevista.
 
-### Fine-tune in-domain (variante A, 2026-06-06) — resultado negativo revelador
+### v4 — + B2W reviews (2026-06-07) — REGREDIU; cegueira do eval (de novo)
+
+Adicionou 498 exemplos do B2W-Reviews01 (anotados por Kimi via annotate-corpus `--text-file`,
+agora com `--concurrency`) ao mix do v3. B2W reforça os avaliativos (expressar_emocao 531, sugerir 95).
+Zero-shot Porttinari: **v3 0.269 → v4 0.219** (acc 0.843). `expressar_emocao` até caiu (0.20→0.157),
+`prometer` 0.13→0. **Adicionar dado real OOD piorou o número.**
+
+Causa (não é bug): **B2W (review de produto) é muito fora-de-domínio do Porttinari (notícia)**; o
+flood de `expressar_emocao` estilo-review desloca os priors → o modelo dispara emoção demais em
+notícia (onde n=37) e perde precisão nos atos que dominam notícia. v3 (entrevista) ajudou porque o
+registro é mais próximo de notícia; v4 (review) não. **Lição (3ª vez): sem um eval representativo
+dos domínios-alvo, otimizamos "o melhor em notícia" — que não é necessariamente o melhor no geral.**
+B2W não é dado ruim; Porttinari é o juiz errado pra atos de review. **Manter o v3 como candidato;
+não shipar o v4.** O bloqueio real volta a ser: **eval humano/multi-domínio** ([[synthetic-data-techniques]] §5).
 
 Split 80/20 do Porttinari (train 3272 / test 819), LoRA 5 épocas, **sem class weights**:
 
