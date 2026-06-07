@@ -24,6 +24,14 @@ from atos.gen.prompts import build_annotation_prompt, parse_llm_json
 from atos.gen.dataset import append_annotation, load_done_annotations
 
 
+# Teachers quote with straight quotes; FAPESP text uses curly — normalize so quotes resolve.
+_SMART = str.maketrans({"’": "'", "‘": "'", "“": '"', "”": '"'})
+
+
+def _normalize(s: str) -> str:
+    return s.translate(_SMART)
+
+
 def _make_client(provider: str, model):
     """Instantiate the chosen teacher; only pass model if the user overrode it."""
     kw = {"model": model} if model else {}
@@ -81,7 +89,7 @@ def run(args) -> int:
 
     kept = rejected = 0
     for t in turns:
-        text = t["text"]
+        text = _normalize(t["text"])
         if not (args.min_chars <= len(text) <= args.max_chars) or text in done:
             continue
         try:
